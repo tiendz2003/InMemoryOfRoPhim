@@ -20,11 +20,16 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "BaseProject"
+rootProject.name = "RoPhim"
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 include(":app")
 include(":core:model")
-include(":feature:home")
-include(":feature:login")
 include(":core:data")
 include(":core:common")
+include(":core:network")
+include(":core:ui")
+include(":core:designsystem")
+include(":core:navigation")
+include(":feature:home:api")
+include(":feature:home:impl")
+include(":core:domain")

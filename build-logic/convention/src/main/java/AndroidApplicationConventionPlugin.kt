@@ -12,7 +12,7 @@ class AndroidApplicationConventionPlugin: Plugin<Project> {
             apply(plugin = "com.android.application")
             extensions.configure<ApplicationExtension> {
                 configureKotlinAndroid(this)
-                defaultConfig.targetSdk = 35
+                defaultConfig.targetSdk = 36
 
                 packaging {
                     resources {

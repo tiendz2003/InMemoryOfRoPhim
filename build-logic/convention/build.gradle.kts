@@ -1,5 +1,3 @@
-
-
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
@@ -57,8 +55,16 @@ gradlePlugin {
             id = "base.android.feature"
             implementationClass = "AndroidFeatureConventionPlugin"
         }
+        register("androidFeatureApi") {
+            id = libs.plugins.rophim.android.feature.api.get().pluginId
+            implementationClass = "AndroidFeatureApiConventionPlugin"
+        }
+        register("androidFeatureImpl") {
+            id = libs.plugins.rophim.android.feature.impl.get().pluginId
+            implementationClass = "AndroidFeatureImplConventionPlugin"
+        }
         register("androidHilt") {
-            id = "base.android.hilt"
+            id = libs.plugins.base.android.hilt.get().pluginId
             implementationClass = "AndroidHiltConventionPlugin"
         }
         register("jvmLibrary") {

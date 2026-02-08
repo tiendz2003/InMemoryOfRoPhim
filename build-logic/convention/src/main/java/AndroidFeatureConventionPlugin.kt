@@ -15,15 +15,16 @@ class AndroidFeatureConventionPlugin : Plugin<Project> {
             }
 
             dependencies {
+                implementation(project(":core:ui"))
+                implementation(project(":core:designsystem"))
                 implementation(project(":core:model"))
                 implementation(project(":core:data"))
                 implementation(project(":core:common"))
-
                 // Define common dependencies for feature modules
-               /* "implementation"(libs.findLibrary("androidx.hilt.navigation.compose").get())
-                "implementation"(libs.findLibrary("androidx.lifecycle.runtimeCompose").get())
-                "implementation"(libs.findLibrary("androidx.lifecycle.viewModelCompose").get())*/
-                implementation(libs.findLibrary("androidx-navigation-compose").get())
+                implementation(libs.findLibrary("androidx.lifecycle.runtimeCompose").get())
+                implementation(libs.findLibrary("androidx.lifecycle.viewModelCompose").get())
+                implementation(libs.findLibrary("androidx.hilt.lifecycle.viewModelCompose").get())
+                implementation(libs.findLibrary("androidx.navigation3.runtime").get())
                 implementation(libs.findLibrary("kotlinx-serialization-json").get())
             }
         }
