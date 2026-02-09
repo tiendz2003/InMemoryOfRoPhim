@@ -9,7 +9,7 @@ androidxNavigation = "2.9.6"
 baseJunit = "4.13.2"
 coreKtxVersion = "1.13.1"
 espressoCore = "3.5.1"
-hilt = "2.59.1"
+hilt = "2.59"
 junit = "1.1.5"
 kotlin = "2.3.10"
 kotlinxSerializationJson = "1.10.0"
@@ -132,7 +132,7 @@ ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 # Plugins defined by this project
-base-android-application = { id = "base.android.application", version = "unspecific" }
+rophim-android-application = { id = "rophim.android.application", version = "unspecific" }
 base-android-application-compose = { id = "base.android.application.compose", version = "unspecific" }
 base-android-library = { id = "base.android.library", version = "unspecific" }
 base-android-library-compose = { id = "base.android.library.compose", version = "unspecific" }
