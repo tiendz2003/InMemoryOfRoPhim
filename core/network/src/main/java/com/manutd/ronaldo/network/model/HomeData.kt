@@ -1,6 +1,7 @@
 package com.manutd.ronaldo.network.model
 
 import android.R.attr.rating
+import javax.annotation.concurrent.Immutable
 
 
 data class HomeData(
@@ -22,7 +23,7 @@ data class Group(
     val type: ChannelType = ChannelType.UNKNOWN,
     // từ Group.RemoteData.url
 )
-
+@Immutable
 data class Channel(
     val id: String,
     val name: String,

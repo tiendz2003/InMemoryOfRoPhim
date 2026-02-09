@@ -97,13 +97,8 @@ internal object NetworkModule {
             .crossfade(true)
             .components {
                 add(
-                    OkHttpNetworkFetcherFactory(
-                        callFactory = {
-                            okHttpCallFactory.get().apply {
-                                newBuilder().build()
-                            } as OkHttpClient
-
-                        }
+                    OkHttpNetworkFetcherFactory (
+                        callFactory = { okHttpCallFactory.get() },
                     )
                 )
             }

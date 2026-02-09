@@ -2,7 +2,9 @@ package com.manutd.ronaldo.impl.screen
 
 
 
+import android.util.Log
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.collectIsDraggedAsState
@@ -12,11 +14,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.PagerState
@@ -48,6 +53,9 @@ import com.manutd.ronaldo.designsystem.component.RoButton
 import com.manutd.ronaldo.designsystem.theme.GoldGradient
 import com.manutd.ronaldo.designsystem.theme.RoTheme
 import com.manutd.ronaldo.network.model.Channel
+import com.tbuonomo.viewpagerdotsindicator.compose.DotsIndicator
+import com.tbuonomo.viewpagerdotsindicator.compose.model.DotGraphic
+import com.tbuonomo.viewpagerdotsindicator.compose.type.ShiftIndicatorType
 import customBlur
 import kotlinx.coroutines.delay
 import kotlin.math.absoluteValue
@@ -131,7 +139,7 @@ fun CarouselSection(
                 pageSize = PageSize.Fill,
                 modifier = Modifier
                     .weight(1f)
-                    .padding(top = 40.dp)
+                    .padding(top = 40.dp, bottom = 20.dp)
             ) { page ->
                 val channel = channels[page]
 
@@ -162,10 +170,11 @@ fun CarouselSection(
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
-
-                CarouselIndicator(
-                    pageCount = channels.size,
-                    currentPage = pagerState.currentPage
+                DotsIndicator(
+                    modifier = Modifier.height(10.dp),
+                    dotCount = pagerState.pageCount,
+                    type = ShiftIndicatorType(dotsGraphic = DotGraphic(color = Color.White)),
+                    pagerState = pagerState,
                 )
             }
         }
@@ -182,32 +191,39 @@ private fun CarouselItem(
     val pageOffset = (pagerState.currentPage - page) + pagerState.currentPageOffsetFraction
     val absOffset = pageOffset.absoluteValue.coerceIn(0f, 1f)
 
-    // Hiệu ứng scale/alpha
     val scale = lerp(0.85f, 1f, 1f - absOffset)
     val alpha = lerp(0.5f, 1f, 1f - absOffset)
 
-    // Card bọc ngoài để xử lý Shadow và Shape tốt hơn AsyncImage trần
     Card(
         shape = RoundedCornerShape(12.dp),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = if (absOffset < 0.1f) 12.dp else 4.dp // Item giữa nổi cao hơn
+            defaultElevation = if (absOffset < 0.1f) 12.dp else 4.dp
         ),
+        border = BorderStroke(1.dp, Color.White),
         modifier = Modifier
-            .fillMaxSize()
-            .zIndex(-absOffset) // Đẩy item phụ ra sau
+            .fillMaxWidth()
+            .aspectRatio(3f / 4f)
+
+            .zIndex(-absOffset)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
                 this.alpha = alpha
-                // Xóa shadowElevation ở đây vì Card đã lo rồi
             }
             .clickable(onClick = onClick)
     ) {
         AsyncImage(
             model = channel.logoUrl,
             contentDescription = channel.name,
+            // 2. Đổi sang Crop để ảnh tràn viền 16:9 đẹp hơn
             contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.fillMaxSize(),
+            onError = { e ->
+                Log.e("CarouselItem", "Error: ${e.result.throwable.message}")
+            },
+            onSuccess = {
+                Log.d("CarouselItem", "Success")
+            }
         )
     }
 }

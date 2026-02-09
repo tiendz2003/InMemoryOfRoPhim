@@ -43,59 +43,56 @@ fun HomeScreen(
     LaunchedEffect(Unit) {
         viewModel.fetchMovies(forceRefresh = false)
     }
-    Scaffold(
-        modifier = modifier.fillMaxSize(),
-        containerColor = Color.Black // Nền đen theo style Netflix
-    ) { innerPadding ->
-        PullToRefreshBox(
-            isRefreshing = state.isRefreshing,
-            onRefresh = {
-                // Khi người dùng kéo, bắt buộc tải lại
-                viewModel.fetchMovies(forceRefresh = true)
-            },
-            modifier = Modifier
-                .padding(innerPadding)
-                .fillMaxSize(),
-            // Tùy chỉnh màu sắc indicator nếu cần
-            // containerColor = Color.White,
-            // contentColor = Color.Red
-        ) {
-            // 3. Xử lý UI State dựa trên Async<T> của Mavericks
-            val groupsAsync = state.sections
-            val currentGroups = groupsAsync.invoke() // Lấy giá trị hiện tại (có thể là data cũ khi đang loading)
+    PullToRefreshBox(
+        isRefreshing = state.isRefreshing,
+        onRefresh = {
+            // Khi người dùng kéo, bắt buộc tải lại
+            viewModel.fetchMovies(forceRefresh = true)
+        },
+        modifier = Modifier
+            .fillMaxSize(),
+        // Tùy chỉnh màu sắc indicator nếu cần
+        // containerColor = Color.White,
+        // contentColor = Color.Red
+    ) {
+        // 3. Xử lý UI State dựa trên Async<T> của Mavericks
+        val groupsAsync = state.sections
+        val currentGroups =
+            groupsAsync.invoke() // Lấy giá trị hiện tại (có thể là data cũ khi đang loading)
 
-            when {
-                // CASE A: Lỗi -> Hiện màn hình lỗi
-                state.hasError -> {
-                    ErrorContent(
-                        message = state.errorMessage ?: "Đã có lỗi xảy ra",
-                        onRetry = { viewModel.retry() }
-                    )
-                }
-                (state.isLoading || state.isUninitialized) && currentGroups.isNullOrEmpty() -> {
-                    LoadingContent()
-                }
+        when {
+            // CASE A: Lỗi -> Hiện màn hình lỗi
+            state.hasError -> {
+                ErrorContent(
+                    message = state.errorMessage ?: "Đã có lỗi xảy ra",
+                    onRetry = { viewModel.retry() }
+                )
+            }
 
-                !currentGroups.isNullOrEmpty() -> {
-                    HomeContent(
-                        sections = currentGroups,
-                        onChannelClick = { channel ->
-                            viewModel.selectChannel(channel.id)
-                            onChannelClick(channel.id)
-                        },
-                        modifier = Modifier.fillMaxSize()
-                    )
-                }
+            (state.isLoading || state.isUninitialized) && currentGroups.isNullOrEmpty() -> {
+                LoadingContent()
+            }
 
-                else -> {
-                    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                        androidx.compose.material3.Text("Không có nội dung", color = Color.White)
-                    }
+            !currentGroups.isNullOrEmpty() -> {
+                HomeContent(
+                    sections = currentGroups,
+                    onChannelClick = { channel ->
+                        viewModel.selectChannel(channel.id)
+                        onChannelClick(channel.id)
+                    },
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+
+            else -> {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    androidx.compose.material3.Text("Không có nội dung", color = Color.White)
                 }
             }
         }
     }
 }
+
 @Composable
 private fun HomeContent(
     sections: List<HomeSection>,
@@ -122,12 +119,12 @@ private fun HomeContent(
                 }
 
                 is HomeSection.HorizontalList -> {
-                   /* HorizontalListSection(
-                        title = section.title,
-                        channels = section.channels,
-                        onChannelClick = onChannelClick,
-                        onSeeAllClick = if (section.showSeeAll) {
-                            { *//* Navigate to see all *//* }
+                    /* HorizontalListSection(
+                         title = section.title,
+                         channels = section.channels,
+                         onChannelClick = onChannelClick,
+                         onSeeAllClick = if (section.showSeeAll) {
+                             { *//* Navigate to see all *//* }
                         } else null,
                         modifier = Modifier.padding(top = 16.dp)
                     )*/
@@ -145,6 +142,7 @@ private fun HomeContent(
         }
     }
 }
+
 @Composable
 private fun LoadingContent(
     modifier: Modifier = Modifier
