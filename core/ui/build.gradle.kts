@@ -8,16 +8,13 @@ android {
 }
 
 dependencies {
-   /* api(libs.androidx.metrics)
-    api(projects.core.analytics)
-    api(projects.core.designsystem)*/
     api(projects.core.model)
     api(projects.core.designsystem)
     api(libs.mavericks)
-    //implementation(libs.androidx.browser)
-    implementation(libs.coil.kt)
-    implementation(libs.coil.kt.compose)
+    api(libs.coil.kt.network)
+    api(libs.coil.kt.compose)
+    api(libs.coil)
 
-   /* androidTestImplementation(libs.bundles.androidx.compose.ui.test)
-    androidTestImplementation(projects.core.testing)*/
+    /* androidTestImplementation(libs.bundles.androidx.compose.ui.test)
+     androidTestImplementation(projects.core.testing)*/
 }

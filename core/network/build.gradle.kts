@@ -14,9 +14,8 @@ android {
 
 dependencies {
     implementation(libs.androidx.tracing.ktx)
-    implementation(libs.coil.kt)
-    implementation(libs.coil.kt.svg)
     api(libs.bundles.sandwich.networking)
+    implementation(libs.coil.kt.network)
     api(projects.core.common)
     api(projects.core.model)
     implementation(libs.okhttp.logging)

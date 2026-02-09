@@ -3,7 +3,7 @@ import org.gradle.kotlin.dsl.implementation
 plugins {
     alias(libs.plugins.base.android.application)
     alias(libs.plugins.base.android.application.compose)
-    alias(libs.plugins.base.android.hilt)
+   // alias(libs.plugins.base.android.hilt)
     alias(libs.plugins.kotlin.android)
 }
 
@@ -46,11 +46,9 @@ android {
 dependencies {
     implementation(projects.feature.home.api)
     implementation(projects.feature.home.impl)
-    implementation(libs.coil.kt)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.coroutines.guava)
-
-    ksp(libs.hilt.compiler)
+//    ksp(libs.hilt.compiler)
     debugImplementation(libs.androidx.compose.ui.testManifest)
     kspTest(libs.hilt.compiler)
     implementation(projects.core.common)

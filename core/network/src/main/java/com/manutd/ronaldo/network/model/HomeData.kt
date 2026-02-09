@@ -1,5 +1,7 @@
 package com.manutd.ronaldo.network.model
 
+import android.R.attr.rating
+
 
 data class HomeData(
     val color: String,
@@ -28,7 +30,12 @@ data class Channel(
     val description: String,
     val logoUrl: String,        // từ Channel.Image.url
     val streamUrl: String,      // từ Channel.RemoteData.url
-    val shareUrl: String        // từ Channel.Share.url
+    val shareUrl: String,       // từ Channel.Share.url
+    val imdb: String? = null,
+    val quality: String? = null,
+    val rating: String? = null,
+    val year: String? = null,
+    val episode: String? = null
 )
 
 enum class ChannelType {
@@ -88,6 +95,11 @@ fun HomeResponse.Group.Channel.toDomain(): Channel {
         description = description,
         logoUrl = image.url,
         streamUrl = remoteData.url,
-        shareUrl = share.url
+        shareUrl = share.url,
+        imdb = "7.0",
+        quality = "HD",
+        rating = "3.5",
+        year = "2025",
+        episode = "34"
     )
 }

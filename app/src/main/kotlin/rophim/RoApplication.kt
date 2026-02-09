@@ -4,13 +4,14 @@ import android.app.Application
 import android.content.pm.ApplicationInfo
 import android.os.StrictMode
 import android.os.StrictMode.ThreadPolicy.Builder
-import coil.ImageLoader
-import coil.ImageLoaderFactory
+import coil3.ImageLoader
+import coil3.PlatformContext
+import coil3.SingletonImageLoader
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
 
 @HiltAndroidApp
-class RoApplication: Application(), ImageLoaderFactory {
+class RoApplication : Application(), SingletonImageLoader.Factory {
     @Inject
     lateinit var imageLoader: dagger.Lazy<ImageLoader>
     override fun onCreate() {
@@ -19,9 +20,8 @@ class RoApplication: Application(), ImageLoaderFactory {
         setStrictModePolicy()
 
         // Initialize Sync; the system responsible for keeping data in the app up to date.
-       // Sync.initialize(context = this)
+        // Sync.initialize(context = this)
     }
-    override fun newImageLoader(): ImageLoader = imageLoader.get()
     private fun isDebuggable(): Boolean {
         return 0 != applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE
     }
@@ -32,5 +32,9 @@ class RoApplication: Application(), ImageLoaderFactory {
                 Builder().detectAll().penaltyLog().build(),
             )
         }
+    }
+
+    override fun newImageLoader(context: PlatformContext): ImageLoader {
+        return imageLoader.get()
     }
 }

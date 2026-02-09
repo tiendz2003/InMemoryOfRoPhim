@@ -1,9 +1,6 @@
 package com.manutd.ronaldo.network.di
 
 import android.content.Context
-import coil.ImageLoader
-import coil.decode.SvgDecoder
-import coil.util.DebugLogger
 import com.manutd.rophim.core.network.BuildConfig
 import dagger.Module
 import dagger.Provides
@@ -16,11 +13,19 @@ import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import javax.inject.Singleton
 import androidx.tracing.trace
+import coil3.ImageLoader
+import coil3.disk.DiskCache
+import coil3.disk.directory
+import coil3.memory.MemoryCache
+import coil3.network.okhttp.OkHttpNetworkFetcherFactory
+import coil3.request.crossfade
+import coil3.util.DebugLogger
 import com.manutd.ronaldo.network.retrofit.RetrofitRoNetworkApi
 import com.skydoves.sandwich.retrofit.adapters.ApiResponseCallAdapterFactory
 import okhttp3.MediaType.Companion.toMediaType
 import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
+import java.nio.file.attribute.AclEntry.newBuilder
 import kotlin.jvm.java
 
 @Module
@@ -85,20 +90,33 @@ internal object NetworkModule {
     @Provides
     @Singleton
     fun imageLoader(
-        // We specifically request dagger.Lazy here, so that it's not instantiated from Dagger.
         okHttpCallFactory: dagger.Lazy<Call.Factory>,
-        @ApplicationContext application: Context,
+        @ApplicationContext context: Context,
     ): ImageLoader = trace("RoImageLoader") {
-        ImageLoader.Builder(application)
-            .callFactory { okHttpCallFactory.get() }
-            .components { add(SvgDecoder.Factory()) }
-            // Assume most content images are versioned urls
-            // but some problematic images are fetching each time
-            .respectCacheHeaders(false)
-            .apply {
-                if (BuildConfig.DEBUG) {
-                    logger(DebugLogger())
-                }
+        ImageLoader.Builder(context)
+            .crossfade(true)
+            .components {
+                add(
+                    OkHttpNetworkFetcherFactory(
+                        callFactory = {
+                            okHttpCallFactory.get().apply {
+                                newBuilder().build()
+                            } as OkHttpClient
+
+                        }
+                    )
+                )
+            }
+            .memoryCache {
+                MemoryCache.Builder()
+                    .maxSizePercent(context, 0.25)
+                    .build()
+            }
+            .diskCache {
+                DiskCache.Builder()
+                    .directory(context.cacheDir.resolve("image_cache"))
+                    .maxSizePercent(0.02)
+                    .build()
             }
             .build()
     }

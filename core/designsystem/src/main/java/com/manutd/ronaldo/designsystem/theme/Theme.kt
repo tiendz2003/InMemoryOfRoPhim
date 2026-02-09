@@ -10,6 +10,7 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.material3.surfaceColorAtElevation
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
@@ -143,6 +144,9 @@ val DarkAndroidColorScheme = darkColorScheme(
  * Light Android gradient colors
  */
 val LightAndroidGradientColors = GradientColors(container = DarkGreenGray95)
+val GoldGradient = Brush.horizontalGradient(
+    colors = listOf(YellowLight, Yellow)
+)
 
 /**
  * Dark Android gradient colors

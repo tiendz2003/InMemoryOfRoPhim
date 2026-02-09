@@ -95,15 +95,15 @@ class MoviesViewModelTest {
 
         // --- THEN (Kiểm tra) ---
         // 1. Chờ state chuyển sang Success
-        viewModel.awaitState().groups is Success
+        viewModel.awaitState().sections is Success
 
         // 2. Kiểm tra dữ liệu bên trong State
         com.airbnb.mvrx.withState(viewModel) { state ->
             // Kiểm tra trạng thái thành công
-            assertTrue(state.groups is Success)
+            assertTrue(state.sections is Success)
 
             // Lấy dữ liệu ra
-            val groups = state.groups.invoke()
+            val groups = state.sections.invoke()
 
             // Kiểm tra số lượng
             assertEquals(2, groups?.size)
@@ -128,13 +128,13 @@ class MoviesViewModelTest {
 
         // --- THEN ---
         // Chờ state chuyển sang Fail
-        viewModel.awaitState().groups is Fail
+        viewModel.awaitState().sections is Fail
 
         withState(viewModel) { state ->
-            assertTrue(state.groups is Fail)
+            assertTrue(state.sections is Fail)
             // Kiểm tra message lỗi (nếu ViewModel có cơ chế wrap lỗi)
             // Lưu ý: state.groups là Fail<List<Group>>
-            val error = (state.groups as Fail).error
+            val error = (state.sections as Fail).error
             assertEquals(errorMessage, error.message)
         }
     }

@@ -1,6 +1,9 @@
 package com.manutd.ronaldo.impl
 
+import android.util.Log
 import com.airbnb.mvrx.Async
+import com.airbnb.mvrx.Fail
+import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
@@ -8,8 +11,8 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.hilt.AssistedViewModelFactory
 import com.airbnb.mvrx.hilt.hiltMavericksViewModelFactory
 import com.manutd.ronaldo.domain.GetHomeResourceUseCase
-import com.manutd.ronaldo.network.model.ChannelType
-import com.manutd.ronaldo.network.model.Group
+import com.manutd.ronaldo.impl.utils.HomeSection
+import com.manutd.ronaldo.impl.utils.toHomeSections
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -19,10 +22,10 @@ class HomeViewModel @AssistedInject constructor(
     private val getHomeResourceUseCase: GetHomeResourceUseCase
 ) : MavericksViewModel<MoviesState>(initialState) {
 
-    //gọi trong laucheEffect
+    //gọi trong launchEffect
     fun fetchMovies(forceRefresh: Boolean = true) {
         withState { state ->
-            val shouldFetch = state.groups is Uninitialized || forceRefresh
+            val shouldFetch = state.sections is Uninitialized || forceRefresh
             if (shouldFetch) {
                 if (forceRefresh) {
                     setState { copy(isRefreshing = true) }
@@ -31,14 +34,14 @@ class HomeViewModel @AssistedInject constructor(
                     getHomeResourceUseCase.invoke(
                         onError = { message ->
                             // Log error nhưng vẫn throw để Async catch
-                            android.util.Log.e("HomeViewModel", "Error: $message")
+                            Log.e("HomeViewModel", "Error: $message")
                             throw Exception(message)
                         }
-                    ).groups
-                }.execute { asyncGroups ->
+                    ).groups.toHomeSections()
+                }.execute { asyncSections ->
                     // Copy state với Async result mới
                     copy(
-                        groups = asyncGroups,
+                        sections = asyncSections,
                         isRefreshing = false
                     )
                 }
@@ -90,18 +93,23 @@ class HomeViewModel @AssistedInject constructor(
 }
 
 data class MoviesState(
-    val groups: Async<List<Group>> = Uninitialized,
+    val sections: Async<List<HomeSection>> = Uninitialized,
     val selectedChannelId: String? = null,
     val isRefreshing: Boolean = false
 ) : MavericksState {
 
-    // Derived properties
-    val sliderGroups: List<Group>
-        get() = groups()?.filter { it.type == ChannelType.SLIDER } ?: emptyList()
+    val isLoading: Boolean
+        get() = sections is Loading
 
-    val horizontalGroups: List<Group>
-        get() = groups()?.filter { it.type == ChannelType.HORIZONTAL } ?: emptyList()
+    val hasError: Boolean
+        get() = sections is Fail
 
-    val topGroups: List<Group>
-        get() = groups()?.filter { it.type == ChannelType.TOP } ?: emptyList()
+    val errorMessage: String?
+        get() = (sections as? Fail)?.error?.message
+    val isUninitialized: Boolean
+        get() = sections is Uninitialized
+
+
+    val homeSections: List<HomeSection>
+        get() = sections() ?: emptyList()
 }

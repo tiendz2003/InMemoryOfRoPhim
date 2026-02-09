@@ -8,6 +8,10 @@ import com.manutd.ronaldo.navigation.Navigator
 
 fun EntryProviderScope<NavKey>.homeEntry(navigator: Navigator) {
     entry<HomeNavKey> {
-        HomeScreen()
+        HomeScreen(
+            onChannelClick = { channelId ->
+                //   navigator.navigateToDetail(channelId)
+            }
+        )
     }
 }
