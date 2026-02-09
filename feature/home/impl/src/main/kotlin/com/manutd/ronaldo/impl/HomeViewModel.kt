@@ -9,13 +9,19 @@ import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.hilt.AssistedViewModelFactory
+import com.airbnb.mvrx.hilt.MavericksViewModelComponent
+import com.airbnb.mvrx.hilt.ViewModelKey
 import com.airbnb.mvrx.hilt.hiltMavericksViewModelFactory
 import com.manutd.ronaldo.domain.GetHomeResourceUseCase
 import com.manutd.ronaldo.impl.utils.HomeSection
 import com.manutd.ronaldo.impl.utils.toHomeSections
+import dagger.Binds
+import dagger.Module
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import dagger.hilt.InstallIn
+import dagger.multibindings.IntoMap
 
 class HomeViewModel @AssistedInject constructor(
     @Assisted initialState: MoviesState,
@@ -31,13 +37,13 @@ class HomeViewModel @AssistedInject constructor(
                     setState { copy(isRefreshing = true) }
                 }
                 suspend {
-                    getHomeResourceUseCase.invoke(
-                        onError = { message ->
-                            // Log error nhưng vẫn throw để Async catch
-                            Log.e("HomeViewModel", "Error: $message")
-                            throw Exception(message)
-                        }
-                    ).groups.toHomeSections()
+                    try {
+                        getHomeResourceUseCase.invoke(
+                            onError = { throw Exception(it) }
+                        ).groups.toHomeSections()
+                    } catch (e: Exception) {
+                        throw e
+                    }
                 }.execute { asyncSections ->
                     // Copy state với Async result mới
                     copy(
@@ -112,4 +118,14 @@ data class MoviesState(
 
     val homeSections: List<HomeSection>
         get() = sections() ?: emptyList()
+}
+
+@Module
+@InstallIn(MavericksViewModelComponent::class) // 1. Cài đặt vào Component riêng của Mavericks
+interface HomeViewModelModule {
+
+    @Binds
+    @IntoMap // 2. Đưa vào Map (để sửa cái lỗi MissingBinding Map kia)
+    @ViewModelKey(HomeViewModel::class) // 3. Định danh Key là class ViewModel của bạn
+    fun bindHomeViewModelFactory(factory: HomeViewModel.Factory): AssistedViewModelFactory<*, *>
 }

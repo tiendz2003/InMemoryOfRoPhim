@@ -132,13 +132,14 @@ ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 # Plugins defined by this project
-rophim-android-application = { id = "rophim.android.application", version = "unspecific" }
-base-android-application-compose = { id = "base.android.application.compose", version = "unspecific" }
-base-android-library = { id = "base.android.library", version = "unspecific" }
-base-android-library-compose = { id = "base.android.library.compose", version = "unspecific" }
-base-android-feature = { id = "base.android.feature", version = "unspecific" }
-base-android-hilt = { id = "base.android.hilt", version = "unspecific" }
-base-jvm-library = { id = "base.jvm.library", version = "unspecific" }
+
+rophim-android-application = { id = "rophim.android.application" }
+base-android-application-compose = { id = "base.android.application.compose" }
+base-android-library = { id = "base.android.library" }
+base-android-library-compose = { id = "base.android.library.compose" }
+base-android-feature = { id = "base.android.feature" }
+base-android-hilt = { id = "base.android.hilt" }
+base-jvm-library = { id = "base.jvm.library" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 rophim-android-feature-api = { id = "rophim.android.feature.api" }
 rophim-android-feature-impl = { id = "rophim.android.feature.impl" }

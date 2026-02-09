@@ -8,11 +8,12 @@ import org.gradle.kotlin.dsl.apply
 class AndroidApplicationConventionPlugin: Plugin<Project> {
     override fun apply(target: Project) {
         with(target) {
-            apply(plugin = "org.jetbrains.kotlin.android")
+          //  apply(plugin = "org.jetbrains.kotlin.android")
             apply(plugin = "com.android.application")
             extensions.configure<ApplicationExtension> {
                 configureKotlinAndroid(this)
                 defaultConfig.targetSdk = 36
+                testOptions.animationsDisabled = true
 
                 packaging {
                     resources {

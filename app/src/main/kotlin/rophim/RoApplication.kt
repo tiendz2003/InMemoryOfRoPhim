@@ -7,6 +7,7 @@ import android.os.StrictMode.ThreadPolicy.Builder
 import coil3.ImageLoader
 import coil3.PlatformContext
 import coil3.SingletonImageLoader
+import com.airbnb.mvrx.Mavericks
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
 
@@ -16,7 +17,7 @@ class RoApplication : Application(), SingletonImageLoader.Factory {
     lateinit var imageLoader: dagger.Lazy<ImageLoader>
     override fun onCreate() {
         super.onCreate()
-
+        Mavericks.initialize(this)
         setStrictModePolicy()
 
         // Initialize Sync; the system responsible for keeping data in the app up to date.

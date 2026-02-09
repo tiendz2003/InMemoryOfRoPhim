@@ -30,16 +30,16 @@ import com.airbnb.mvrx.compose.collectAsStateWithLifecycle
 import com.airbnb.mvrx.compose.mavericksViewModel
 import com.manutd.ronaldo.impl.HomeViewModel
 import com.manutd.ronaldo.impl.utils.HomeSection
+import com.manutd.ronaldo.impl.utils.maverickViewModel.mavericksNav3ViewModel
 import com.manutd.ronaldo.network.model.Channel
 
 @Composable
 fun HomeScreen(
     onChannelClick: (String) -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: HomeViewModel = mavericksViewModel()
+    viewModel: HomeViewModel = mavericksNav3ViewModel()
 ) {
     val state by viewModel.collectAsStateWithLifecycle()
-    //val pullRefreshState = rememberPullToRefreshState()
     LaunchedEffect(Unit) {
         viewModel.fetchMovies(forceRefresh = false)
     }

@@ -40,7 +40,7 @@ gradlePlugin {
             implementationClass = "AndroidApplicationComposeConventionPlugin"
         }
         register("androidApplication") {
-            id = libs.plugins.rophim.android.application.asProvider().get().pluginId
+            id = "rophim.android.application"
             implementationClass = "AndroidApplicationConventionPlugin"
         }
         register("androidLibraryCompose") {
