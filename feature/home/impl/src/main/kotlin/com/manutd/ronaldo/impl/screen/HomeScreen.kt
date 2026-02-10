@@ -1,13 +1,22 @@
 package com.manutd.ronaldo.impl.screen
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
@@ -21,75 +30,104 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberTopAppBarState
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsStateWithLifecycle
 import com.airbnb.mvrx.compose.mavericksViewModel
+import com.manutd.ronaldo.api.HomeNavKey
+import com.manutd.ronaldo.designsystem.component.RoTopAppBar
+import com.manutd.ronaldo.designsystem.theme.RoTheme
 import com.manutd.ronaldo.impl.HomeViewModel
 import com.manutd.ronaldo.impl.utils.HomeSection
 import com.manutd.ronaldo.impl.utils.maverickViewModel.mavericksNav3ViewModel
+import com.manutd.ronaldo.navigation.Navigator
 import com.manutd.ronaldo.network.model.Channel
 
+@Preview(showBackground = true)
+@Composable
+fun HomeScreenPreview() {
+    RoTheme(
+        androidTheme = true,
+        disableDynamicTheming = true
+    ) {
+        HomeScreen(
+            onChannelClick = {},
+            onNotificationClick = {},
+            onLogoClick = {}
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     onChannelClick: (String) -> Unit,
+    onNotificationClick: () -> Unit,
+    onLogoClick: () -> Unit,
     modifier: Modifier = Modifier,
     viewModel: HomeViewModel = mavericksNav3ViewModel()
 ) {
     val state by viewModel.collectAsStateWithLifecycle()
+
+    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(
+        state = rememberTopAppBarState(),
+        canScroll = { true }
+    )
+
     LaunchedEffect(Unit) {
         viewModel.fetchMovies(forceRefresh = false)
     }
-    PullToRefreshBox(
-        isRefreshing = state.isRefreshing,
-        onRefresh = {
-            // Khi người dùng kéo, bắt buộc tải lại
-            viewModel.fetchMovies(forceRefresh = true)
-        },
-        modifier = Modifier
-            .fillMaxSize(),
-        // Tùy chỉnh màu sắc indicator nếu cần
-        // containerColor = Color.White,
-        // contentColor = Color.Red
+
+    Box(
+        modifier = modifier
+            .fillMaxSize()
+            .nestedScroll(scrollBehavior.nestedScrollConnection)
+
     ) {
-        // 3. Xử lý UI State dựa trên Async<T> của Mavericks
-        val groupsAsync = state.sections
-        val currentGroups =
-            groupsAsync.invoke() // Lấy giá trị hiện tại (có thể là data cũ khi đang loading)
 
-        when {
-            // CASE A: Lỗi -> Hiện màn hình lỗi
-            state.hasError -> {
-                ErrorContent(
-                    message = state.errorMessage ?: "Đã có lỗi xảy ra",
-                    onRetry = { viewModel.retry() }
-                )
-            }
+        PullToRefreshBox(
+            isRefreshing = state.isRefreshing,
+            onRefresh = { viewModel.fetchMovies(forceRefresh = true) },
+            modifier = Modifier.fillMaxSize()
+        ) {
+            val sections = state.sections.invoke()
 
-            (state.isLoading || state.isUninitialized) && currentGroups.isNullOrEmpty() -> {
-                LoadingContent()
-            }
-
-            !currentGroups.isNullOrEmpty() -> {
+            if (!sections.isNullOrEmpty()) {
                 HomeContent(
-                    sections = currentGroups,
+                    sections = sections,
                     onChannelClick = { channel ->
                         viewModel.selectChannel(channel.id)
                         onChannelClick(channel.id)
                     },
-                    modifier = Modifier.fillMaxSize()
+                    contentPadding = PaddingValues(bottom = 100.dp)
+                )
+            } else if (state.isLoading) {
+                LoadingContent()
+            } else if (state.hasError) {
+                ErrorContent(
+                    message = state.errorMessage ?: "Lỗi",
+                    onRetry = { viewModel.retry() }
                 )
             }
-
-            else -> {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    androidx.compose.material3.Text("Không có nội dung", color = Color.White)
-                }
-            }
         }
+        RoTopAppBar(
+            scrollBehavior = scrollBehavior,
+            hasNotification = true,
+            showMessageDialog = onLogoClick,
+            onNotificationClick = onNotificationClick,
+            bottomContent = {
+                CategoryChipsBar()
+            }
+        )
     }
 }
 
@@ -97,16 +135,17 @@ fun HomeScreen(
 private fun HomeContent(
     sections: List<HomeSection>,
     onChannelClick: (Channel) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    contentPadding: PaddingValues,
 ) {
     LazyColumn(
-        modifier = modifier,
-        contentPadding = PaddingValues(bottom = 16.dp)
+        modifier = modifier.fillMaxSize(),
+        contentPadding = contentPadding
     ) {
         items(
             items = sections,
-            key = { it.id }, // Stable key
-            contentType = { it::class } // Type-based reuse
+            key = { it.id },
+            contentType = { it::class }
         ) { section ->
             when (section) {
                 is HomeSection.Carousel -> {

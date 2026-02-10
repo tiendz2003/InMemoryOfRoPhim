@@ -6,7 +6,9 @@ import android.util.Log
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -26,6 +28,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
@@ -44,6 +47,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.lerp
@@ -135,11 +139,11 @@ fun CarouselSection(
             HorizontalPager(
                 state = pagerState,
                 pageSpacing = 16.dp,
-                contentPadding = PaddingValues(horizontal = 64.dp),
+                contentPadding = PaddingValues(horizontal = 48.dp),
                 pageSize = PageSize.Fill,
                 modifier = Modifier
                     .weight(1f)
-                    .padding(top = 40.dp, bottom = 20.dp)
+                    .padding(top = 100.dp)
             ) { page ->
                 val channel = channels[page]
 
@@ -161,7 +165,7 @@ fun CarouselSection(
                             endY = 500f // Điều chỉnh độ cao gradient
                         )
                     )
-                    .padding(top = 16.dp, bottom = 24.dp),
+                    .padding(bottom = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 MovieInfoSection(
@@ -169,7 +173,7 @@ fun CarouselSection(
                     modifier = Modifier.padding(horizontal = 32.dp)
                 )
 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(12.dp))
                 DotsIndicator(
                     modifier = Modifier.height(10.dp),
                     dotCount = pagerState.pageCount,
@@ -202,7 +206,7 @@ private fun CarouselItem(
         border = BorderStroke(1.dp, Color.White),
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(3f / 4f)
+            .aspectRatio(9f/16f)
 
             .zIndex(-absOffset)
             .graphicsLayer {
@@ -374,27 +378,53 @@ private fun Tag(
 }
 
 @Composable
-private fun CarouselIndicator(
-    pageCount: Int,
-    currentPage: Int,
-    modifier: Modifier = Modifier
-) {
+fun CategoryChipsBar() {
     Row(
-        modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState()) // Cho phép scroll ngang
+            .padding(vertical = 8.dp, horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        repeat(pageCount) { index ->
-            Box(
-                modifier = Modifier
-                    .size(
-                        width = if (index == currentPage) 32.dp else 8.dp,
-                        height = 8.dp
-                    )
-                    .background(
-                        color = if (index == currentPage) Color.White else Color.LightGray,
-                        shape = RoundedCornerShape(4.dp)
-                    )
+        // Chip 1: Recommend (Nền trắng, chữ đen)
+        CategoryChip(text = "Đề xuất", isSelected = true)
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        // Chip 2: Series (Viền trắng, chữ trắng)
+        CategoryChip(text = "Phim bộ", isSelected = false)
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        CategoryChip(text = "Phim lẻ", isSelected = false)
+
+        Spacer(modifier = Modifier.width(8.dp))
+
+        CategoryChip(text = "Thể loại", isSelected = false)
+    }
+}
+
+@Composable
+fun CategoryChip(text: String, isSelected: Boolean) {
+    Box(
+        modifier = Modifier
+            .border(
+                width = 1.dp,
+                color = if (isSelected) Color.Transparent else Color.White.copy(0.5f),
+                shape = RoundedCornerShape(50)
             )
-        }
+            .background(
+                color = if (isSelected) Color.White else Color.Transparent,
+                shape = RoundedCornerShape(50)
+            )
+            .padding(horizontal = 16.dp, vertical = 6.dp)
+            .clickable { /* Handle click */ }
+    ) {
+        Text(
+            text = text,
+            color = if (isSelected) Color.Black else Color.White,
+            style = MaterialTheme.typography.labelMedium,
+            fontWeight = FontWeight.Medium
+        )
     }
 }

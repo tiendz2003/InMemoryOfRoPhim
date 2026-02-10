@@ -11,6 +11,13 @@ fun EntryProviderScope<NavKey>.homeEntry(navigator: Navigator) {
         HomeScreen(
             onChannelClick = { channelId ->
                 //   navigator.navigateToDetail(channelId)
+            },
+            onNotificationClick = {
+                //todo:Navigate sang màn thông báo
+                navigator.navigate(HomeNavKey)
+            },
+            onLogoClick = {
+                //todo:Show message dialog
             }
         )
     }

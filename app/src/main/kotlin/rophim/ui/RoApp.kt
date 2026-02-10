@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -177,32 +178,9 @@ internal fun RoApp(
                         ),
                     ),
             ) {
-                // Only show the top app bar on top level destinations.
-                var shouldShowTopAppBar = false
-
-                if (appState.navigationState.currentKey in appState.navigationState.topLevelKeys) {
-                    shouldShowTopAppBar = true
-
-                    RoTopAppBar(
-                        hasNotification = true,
-                        showMessageDialog = {
-                            onLogoClick()
-                        },
-                        onNotificationClick = {
-                            //todo:Navigate sang màn thông báo
-                            navigator.navigate(HomeNavKey)
-                        }
-                    )
-                }
-
                 Box(
-                    // Workaround for https://issuetracker.google.com/338478720
-                    modifier = Modifier.consumeWindowInsets(
-                        if (shouldShowTopAppBar) {
-                            WindowInsets.safeDrawing.only(WindowInsetsSides.Top)
-                        } else {
-                            WindowInsets(0, 0, 0, 0)
-                        },
+                    modifier = Modifier.systemBarsPadding().consumeWindowInsets(
+                        WindowInsets.safeDrawing.only(WindowInsetsSides.Top)
                     ),
                 ) {
                     val listDetailStrategy = rememberListDetailSceneStrategy<NavKey>()

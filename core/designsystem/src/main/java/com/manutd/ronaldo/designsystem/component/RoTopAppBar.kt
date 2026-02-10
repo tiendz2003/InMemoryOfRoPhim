@@ -1,5 +1,6 @@
 package com.manutd.ronaldo.designsystem.component
 
+import android.R.attr.translationY
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -18,6 +20,7 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -27,6 +30,7 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -34,16 +38,37 @@ import androidx.compose.ui.unit.dp
 import com.manutd.rophim.core.designsystem.R
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RoTopAppBar(
+    scrollBehavior: TopAppBarScrollBehavior? = null,
     hasNotification: Boolean = true,
     showMessageDialog: () -> Unit,
-    onNotificationClick: () -> Unit
+    onNotificationClick: () -> Unit,
+    bottomContent: @Composable () -> Unit = {}
 ) {
+    // Height of the pinned toolbar (Logo, actions)
+    val pinnedHeight = 70.dp
+    // Expanded height including background gradient area and categories
+    // Matches XML viewTopGradient height (125dp) which roughly covers toolbar + categories
+    val expandedHeight = 100.dp
+
+    // Calculate current height based on scroll offset
+    // scrollBehavior.state.heightOffset is a negative value starting from 0 to -(expanded - collapsed)
+    val heightOffset = scrollBehavior?.state?.heightOffset ?: 0f
+
+    // Current height constrained between collapsed and expanded
+    val currentHeight = (expandedHeight + heightOffset.dp).coerceAtLeast(pinnedHeight)
+
+    // Calculate alpha for collapsing content (categories)
+    // 1f when expanded, 0f when approaching collapsed state
+    val collapseFraction = (currentHeight - pinnedHeight) / (expandedHeight - pinnedHeight)
+    val contentAlpha = collapseFraction.coerceIn(0f, 1f)
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(125.dp)
+            .height(currentHeight)
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
@@ -51,12 +76,16 @@ fun RoTopAppBar(
                         Color.Transparent
                     )
                 )
-            ).systemBarsPadding()
+            )
+            // Ensure status bar padding is applied to the container
+            .statusBarsPadding()
+            // Clip to bounds to hide scrolling content
+            .clip(androidx.compose.ui.graphics.RectangleShape)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(70.dp)
+                .height(pinnedHeight)
                 .align(Alignment.TopCenter)
                 .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
@@ -116,6 +145,20 @@ fun RoTopAppBar(
                 }
             }
         }
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter)
+                .padding(top = 24.dp) // Slight padding from bottom
+                .graphicsLayer {
+                    alpha = contentAlpha
+                    // Optional: Parallax or slide effect
+                    translationY = -heightOffset / 2f
+                }
+        ) {
+            bottomContent()
+        }
     }
 }
 
@@ -141,7 +184,7 @@ private fun Modifier.notificationDot(): Modifier =
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview("Top App Bar")
 @Composable
-private fun NiaTopAppBarPreview() {
+private fun TopAppBarPreview() {
     MaterialTheme {
         RoTopAppBar(
             hasNotification = true,
