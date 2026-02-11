@@ -1,5 +1,7 @@
 package com.manutd.ronaldo.impl.utils
 
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.manutd.ronaldo.network.model.Channel
 import com.manutd.ronaldo.network.model.ChannelType
 import com.manutd.ronaldo.network.model.Group
@@ -49,4 +51,36 @@ fun List<Group>.toHomeSections(): List<HomeSection> {
             ChannelType.UNKNOWN -> null
         }
     }
+}
+
+
+object MovieItemConstants {
+    // Top Ranked
+    val TopRankedWidth = 180.dp
+    val TopRankedHeight = 240.dp
+    val TopRankedCornerRadius = 12.dp
+    val TopRankNumberSize = 72.sp
+
+    // Horizontal
+    val HorizontalItemWidth = 160.dp
+    val HorizontalItemHeight = 90.dp
+    val HorizontalCornerRadius = 8.dp
+
+    // Common
+    val BadgePadding = 6.dp
+    val BadgeCornerRadius = 4.dp
+}
+
+// File: MovieBadge.kt
+data class MovieBadge(
+    val text: String,
+    val type: BadgeType
+)
+
+enum class BadgeType {
+    AGE_RATING,      // PĐ-3, PĐ-6
+    TIME_LIMIT,      // LT-28
+    PROMOTION,       // Banner khuyến mãi
+    QUALITY,         // HD, 4K
+    TRENDING         // Hot, New
 }

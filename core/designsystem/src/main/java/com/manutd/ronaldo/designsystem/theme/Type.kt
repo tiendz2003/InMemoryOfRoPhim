@@ -32,7 +32,7 @@ internal val RoTypography = Typography(
     displayMedium = TextStyle(
         fontWeight = FontWeight.Normal,
         fontFamily = FontFamily(
-            Font(R.font.medium),
+            Font(R.font.semibold_italic),
         ),
         fontSize = 45.sp,
         lineHeight = 52.sp,

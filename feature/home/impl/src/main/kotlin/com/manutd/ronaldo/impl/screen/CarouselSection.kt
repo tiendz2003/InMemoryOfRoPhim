@@ -1,8 +1,8 @@
 package com.manutd.ronaldo.impl.screen
 
 
-
 import android.util.Log
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -18,12 +18,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.PagerState
@@ -36,20 +38,26 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextFieldDefaults.contentPadding
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.util.lerp
 import androidx.compose.ui.zIndex
 import coil3.compose.AsyncImage
@@ -102,11 +110,26 @@ fun CarouselSection(
     autoScrollDelayMs: Long = 3000L
 ) {
     if (channels.isEmpty()) return
+
     val pagerState = rememberPagerState(
-        initialPage = 0,
+        initialPage = channels.size / 2,
         pageCount = { channels.size }
     )
     val isDragged by pagerState.interactionSource.collectIsDraggedAsState()
+
+    val configuration = LocalConfiguration.current
+    val screenWidth = configuration.screenWidthDp.dp
+    val cardWidth = 260.dp
+
+    // Tính toán chiều cao cho Pager:
+    // Card Width = 260.dp -> Card Height (tỉ lệ 2:3) = 390.dp
+    // Padding trong Item = 24.dp * 2 (trên dưới) = 48.dp
+    // Padding top của Pager = 120.dp
+    // => Tổng chiều cao an toàn khoảng 560.dp -> 580.dp
+    val pagerHeight = 580.dp
+
+    val horizontalPadding = (screenWidth - cardWidth) / 2
+
     LaunchedEffect(autoScrollEnabled, channels.size) {
         if (autoScrollEnabled && channels.size > 1) {
             while (true) {
@@ -121,32 +144,35 @@ fun CarouselSection(
             }
         }
     }
+
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(650.dp)
-            .background(
-                MaterialTheme.colorScheme.background
-            )
     ) {
         val currentChannel = channels.getOrNull(pagerState.currentPage)
-        //Hiển thị blurBackground
+
+        // Blur Background
         BlurBackground(
             imageUrl = currentChannel?.logoUrl,
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier.matchParentSize()
         )
-        Column(modifier = Modifier.fillMaxSize()) {
+        //poster và thông tin phim
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+        ) {
+            // HorizontalPager
             HorizontalPager(
                 state = pagerState,
-                pageSpacing = 16.dp,
-                contentPadding = PaddingValues(horizontal = 48.dp),
-                pageSize = PageSize.Fill,
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(top = 100.dp)
+                contentPadding = PaddingValues(
+                    start = horizontalPadding,
+                    end = horizontalPadding,
+                    top = 120.dp // Giữ padding top để tránh TopBar
+                ),
+                pageSize = PageSize.Fixed(cardWidth),
+                modifier = Modifier.fillMaxWidth().height(pagerHeight),
+                beyondViewportPageCount = 2
             ) { page ->
                 val channel = channels[page]
-
                 CarouselItem(
                     channel = channel,
                     pagerState = pagerState,
@@ -154,18 +180,12 @@ fun CarouselSection(
                     onClick = { onChannelClick(channel) }
                 )
             }
+
+            // Info Section
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .background(
-                        // Gradient đen mờ dần từ dưới lên để text dễ đọc hơn
-                        Brush.verticalGradient(
-                            colors = listOf(Color.Transparent, Color.Black.copy(0.9f)),
-                            startY = 0f,
-                            endY = 500f // Điều chỉnh độ cao gradient
-                        )
-                    )
-                    .padding(bottom = 24.dp),
+                    .padding(bottom = 32.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 MovieInfoSection(
@@ -173,15 +193,25 @@ fun CarouselSection(
                     modifier = Modifier.padding(horizontal = 32.dp)
                 )
 
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(16.dp))
+
                 DotsIndicator(
                     modifier = Modifier.height(10.dp),
                     dotCount = pagerState.pageCount,
-                    type = ShiftIndicatorType(dotsGraphic = DotGraphic(color = Color.White)),
+                    type = ShiftIndicatorType(
+                        dotsGraphic = DotGraphic(
+                            color = Color.White,
+                            size = 8.dp,
+                            borderWidth = 1.dp,
+                            borderColor = Color.White.copy(0.5f)
+                        )
+                    ),
                     pagerState = pagerState,
                 )
+
             }
         }
+
     }
 }
 
@@ -192,42 +222,44 @@ private fun CarouselItem(
     page: Int,
     onClick: () -> Unit
 ) {
-    val pageOffset = (pagerState.currentPage - page) + pagerState.currentPageOffsetFraction
-    val absOffset = pageOffset.absoluteValue.coerceIn(0f, 1f)
-
-    val scale = lerp(0.85f, 1f, 1f - absOffset)
-    val alpha = lerp(0.5f, 1f, 1f - absOffset)
-
     Card(
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = if (absOffset < 0.1f) 12.dp else 4.dp
-        ),
-        border = BorderStroke(1.dp, Color.White),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        border = BorderStroke(2.dp, Color.White),
         modifier = Modifier
             .fillMaxWidth()
-            .aspectRatio(9f/16f)
-
-            .zIndex(-absOffset)
+            .padding(24.dp)
+            .aspectRatio(2f / 3f)
+            .zIndex(if (pagerState.currentPage == page) 1f else 0f)
             .graphicsLayer {
+                val pageOffset =
+                    (pagerState.currentPage - page) + pagerState.currentPageOffsetFraction
+                val absOffset = pageOffset.absoluteValue
+
+                val scale = lerp(0.85f, 1f, 1f - absOffset.coerceIn(0f, 1f))
+                val alphaVal = lerp(0.6f, 1f, 1f - absOffset.coerceIn(0f, 1f))
+
+
+                translationX = pageOffset
+
+                // Rotation logic
+                val rotationFactor = 20f
+                rotationY = -pageOffset.coerceIn(-1f, 1f) * rotationFactor
+
                 scaleX = scale
                 scaleY = scale
-                this.alpha = alpha
+                alpha = alphaVal
+
+                cameraDistance = 12 * density
+                transformOrigin = TransformOrigin.Center
             }
             .clickable(onClick = onClick)
     ) {
         AsyncImage(
             model = channel.logoUrl,
             contentDescription = channel.name,
-            // 2. Đổi sang Crop để ảnh tràn viền 16:9 đẹp hơn
             contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize(),
-            onError = { e ->
-                Log.e("CarouselItem", "Error: ${e.result.throwable.message}")
-            },
-            onSuccess = {
-                Log.d("CarouselItem", "Success")
-            }
+            modifier = Modifier.fillMaxWidth()
         )
     }
 }
@@ -246,12 +278,23 @@ private fun BlurBackground(
             contentScale = ContentScale.Crop,
             modifier = Modifier
                 .fillMaxSize()
-                .customBlur(20.dp) // Gọi hàm tiện ích blur
-                .drawWithCache() {
-                    // Phủ thêm 1 lớp đen mờ 40% lên toàn bộ ảnh nền để làm dịu mắt
+                .customBlur(20.dp)
+                .drawWithCache {
+                    val gradient = Brush.verticalGradient(
+                        colors = listOf(
+                            Color.Transparent,
+                            Color.Black.copy(alpha = 0.3f),
+                            Color(0xFF38003C).copy(alpha = 0.7f),
+                            Color(0xFF38003C)
+                        ),
+                        startY = 0f,
+                        endY = size.height
+                    )
+
                     onDrawWithContent {
                         drawContent()
-                        drawRect(Color.Black.copy(alpha = 0.4f))
+                        // Vẽ gradient overlay từ dưới lên
+                        drawRect(brush = gradient)
                     }
                 }
         )
@@ -280,7 +323,7 @@ private fun MovieInfoSection(
 
         // English title (placeholder)
         Text(
-            text = "English Title",
+            text = channel.display,
             style = MaterialTheme.typography.bodyMedium,
             color = Color.LightGray,
             maxLines = 1,
@@ -331,7 +374,6 @@ private fun MovieInfoSection(
 }
 
 
-
 @Composable
 private fun MovieTags(
     channel: Channel,
@@ -377,54 +419,80 @@ private fun Tag(
     }
 }
 
+@Preview
+@Composable
+fun TagPreview() {
+    RoTheme {
+        CategoryChipsBar()
+    }
+}
+
 @Composable
 fun CategoryChipsBar() {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .horizontalScroll(rememberScrollState()) // Cho phép scroll ngang
-            .padding(vertical = 8.dp, horizontal = 16.dp),
+            .padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        // Chip 1: Recommend (Nền trắng, chữ đen)
-        CategoryChip(text = "Đề xuất", isSelected = true)
+        val categories = listOf("Đề xuất", "Phim bộ", "Phim lẻ", "Thể loại")
 
-        Spacer(modifier = Modifier.width(8.dp))
-
-        // Chip 2: Series (Viền trắng, chữ trắng)
-        CategoryChip(text = "Phim bộ", isSelected = false)
-
-        Spacer(modifier = Modifier.width(8.dp))
-
-        CategoryChip(text = "Phim lẻ", isSelected = false)
-
-        Spacer(modifier = Modifier.width(8.dp))
-
-        CategoryChip(text = "Thể loại", isSelected = false)
+        categories.forEachIndexed { index, category ->
+            CategoryChip(
+                text = category,
+                isSelected = index == 0 // First item selected by default
+            )
+        }
     }
 }
 
 @Composable
-fun CategoryChip(text: String, isSelected: Boolean) {
+fun CategoryChip(
+    text: String,
+    isSelected: Boolean,
+    modifier: Modifier = Modifier
+) {
+    // Animation màu nền
+    val backgroundColor by animateColorAsState(
+        targetValue = if (isSelected) Color.White else Color.Transparent,
+        animationSpec = tween(durationMillis = 200),
+        label = "chipBackground"
+    )
+
+    // Animation màu chữ
+    val textColor by animateColorAsState(
+        targetValue = if (isSelected) Color.Black else Color.White,
+        animationSpec = tween(durationMillis = 200),
+        label = "chipText"
+    )
+
+    // Định nghĩa hình dáng bo góc dùng chung cho clip và border
+    val shape = RoundedCornerShape(24.dp)
+
     Box(
-        modifier = Modifier
-            .border(
-                width = 1.dp,
-                color = if (isSelected) Color.Transparent else Color.White.copy(0.5f),
-                shape = RoundedCornerShape(50)
+        contentAlignment = Alignment.Center,
+        modifier = modifier
+            // 1. Cắt bo góc (Quan trọng: Phải đặt trước background và border)
+            .clip(shape)
+            // 2. Vẽ viền nếu không được chọn
+            .then(
+                if (!isSelected) {
+                    Modifier.border(1.dp, Color.White.copy(0.4f), shape)
+                } else Modifier
             )
-            .background(
-                color = if (isSelected) Color.White else Color.Transparent,
-                shape = RoundedCornerShape(50)
-            )
-            .padding(horizontal = 16.dp, vertical = 6.dp)
+            // 3. Tô màu nền
+            .background(backgroundColor)
+            // 4. Bắt sự kiện click (Đặt sau clip để hiệu ứng ripple gói gọn trong hình bo góc)
             .clickable { /* Handle click */ }
+            // 5. Padding nội dung (Nên đặt ở Box thay vì Text để vùng click rộng hơn)
+            .padding(horizontal = 16.dp, vertical = 8.dp)
     ) {
         Text(
             text = text,
-            color = if (isSelected) Color.Black else Color.White,
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.Medium
+            color = textColor,
+            style = MaterialTheme.typography.labelLarge,
+            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
         )
     }
 }

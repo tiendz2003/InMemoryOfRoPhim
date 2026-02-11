@@ -59,12 +59,6 @@ fun HomeResponse.toDomain(): HomeData {
     )
 }
 
-data class SectionMovies(
-    val sliderMovies: Group,
-    val horizontalMovies: List<Group>,
-    val topMovies: List<Group>
-)
-
 fun HomeResponse.Group.toDomain(): Group {
     val type = when (display.lowercase()) {
         "horizontal" -> {

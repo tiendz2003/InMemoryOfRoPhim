@@ -1,5 +1,13 @@
 package com.manutd.ronaldo.impl.screen
 
+import android.util.Log
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,7 +26,9 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
@@ -36,6 +46,9 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberTopAppBarState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.rememberNestedScrollInteropConnection
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.airbnb.mvrx.Fail
@@ -77,12 +90,17 @@ fun HomeScreen(
     viewModel: HomeViewModel = mavericksNav3ViewModel()
 ) {
     val state by viewModel.collectAsStateWithLifecycle()
-
-    val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior(
-        state = rememberTopAppBarState(),
-        canScroll = { true }
+    val listState = rememberLazyListState()
+    val isScrolled by remember {
+        derivedStateOf {
+            listState.firstVisibleItemIndex > 0 || listState.firstVisibleItemScrollOffset > 100
+        }
+    }
+    val topBarAlpha by animateFloatAsState(
+        targetValue = if (isScrolled) 0.95f else 0f,
+        label = "TopBarAlpha",
+        animationSpec = tween(300)
     )
-
     LaunchedEffect(Unit) {
         viewModel.fetchMovies(forceRefresh = false)
     }
@@ -90,10 +108,9 @@ fun HomeScreen(
     Box(
         modifier = modifier
             .fillMaxSize()
-            .nestedScroll(scrollBehavior.nestedScrollConnection)
+
 
     ) {
-
         PullToRefreshBox(
             isRefreshing = state.isRefreshing,
             onRefresh = { viewModel.fetchMovies(forceRefresh = true) },
@@ -104,6 +121,7 @@ fun HomeScreen(
             if (!sections.isNullOrEmpty()) {
                 HomeContent(
                     sections = sections,
+                    listState = listState,
                     onChannelClick = { channel ->
                         viewModel.selectChannel(channel.id)
                         onChannelClick(channel.id)
@@ -119,28 +137,42 @@ fun HomeScreen(
                 )
             }
         }
-        RoTopAppBar(
-            scrollBehavior = scrollBehavior,
-            hasNotification = true,
-            showMessageDialog = onLogoClick,
-            onNotificationClick = onNotificationClick,
-            bottomContent = {
+        Column(
+            modifier = Modifier
+                .align(Alignment.TopCenter)
+                .fillMaxWidth()
+        ) {
+            RoTopAppBar(
+                hasNotification = true,
+                showMessageDialog = onLogoClick,
+                onNotificationClick = onNotificationClick,
+            )
+            AnimatedVisibility(
+                modifier = Modifier.fillMaxWidth(),
+                visible = !isScrolled, // Ẩn khi đã scroll
+                enter = expandVertically() + fadeIn(),
+                exit = shrinkVertically() + fadeOut()
+            ) {
                 CategoryChipsBar()
             }
-        )
+        }
+
     }
 }
 
 @Composable
 private fun HomeContent(
     sections: List<HomeSection>,
+    listState: LazyListState,
     onChannelClick: (Channel) -> Unit,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues,
 ) {
     LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        contentPadding = contentPadding
+        modifier = modifier
+            .fillMaxSize(),
+        contentPadding = contentPadding,
+        state = listState,
     ) {
         items(
             items = sections,
@@ -150,6 +182,7 @@ private fun HomeContent(
             when (section) {
                 is HomeSection.Carousel -> {
                     CarouselSection(
+                        modifier = Modifier.padding(top = 24.dp),
                         channels = section.channels,
                         onChannelClick = onChannelClick,
                         autoScrollEnabled = section.autoScrollEnabled,
@@ -158,24 +191,26 @@ private fun HomeContent(
                 }
 
                 is HomeSection.HorizontalList -> {
-                    /* HorizontalListSection(
-                         title = section.title,
-                         channels = section.channels,
-                         onChannelClick = onChannelClick,
-                         onSeeAllClick = if (section.showSeeAll) {
-                             { *//* Navigate to see all *//* }
-                        } else null,
-                        modifier = Modifier.padding(top = 16.dp)
-                    )*/
-                }
-
-                is HomeSection.TopRanked -> {
-                    /*TopRankedSection(
+                    HorizontalListSection(
                         title = section.title,
                         channels = section.channels,
                         onChannelClick = onChannelClick,
-                        modifier = Modifier.padding(top = 16.dp)
-                    )*/
+                        onSeeAllClick = if (section.showSeeAll) {
+                            { /* Navigate to see all */ }
+                        } else null,
+                        modifier = Modifier.padding(top = 24.dp)
+                    )
+                }
+
+                is HomeSection.TopRanked -> {
+                    Log.d("HomeScreen", "TopRankedSection:${section.channels.size}")
+                    TopRankedSection(
+                        title = section.title,
+                        channels = section.channels,
+                        onChannelClick = onChannelClick,
+                        onSeeAllClick = { /* Navigate to top ranked */ },
+                        modifier = Modifier.padding(top = 24.dp)
+                    )
                 }
             }
         }

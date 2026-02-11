@@ -1,6 +1,8 @@
 package com.manutd.ronaldo.designsystem.component
 
 import android.R.attr.translationY
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -14,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Notifications
@@ -22,6 +25,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TopAppBarScrollBehavior
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
@@ -41,34 +45,16 @@ import com.manutd.rophim.core.designsystem.R
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RoTopAppBar(
-    scrollBehavior: TopAppBarScrollBehavior? = null,
     hasNotification: Boolean = true,
     showMessageDialog: () -> Unit,
     onNotificationClick: () -> Unit,
-    bottomContent: @Composable () -> Unit = {}
 ) {
-    // Height of the pinned toolbar (Logo, actions)
-    val pinnedHeight = 70.dp
-    // Expanded height including background gradient area and categories
-    // Matches XML viewTopGradient height (125dp) which roughly covers toolbar + categories
-    val expandedHeight = 100.dp
 
-    // Calculate current height based on scroll offset
-    // scrollBehavior.state.heightOffset is a negative value starting from 0 to -(expanded - collapsed)
-    val heightOffset = scrollBehavior?.state?.heightOffset ?: 0f
-
-    // Current height constrained between collapsed and expanded
-    val currentHeight = (expandedHeight + heightOffset.dp).coerceAtLeast(pinnedHeight)
-
-    // Calculate alpha for collapsing content (categories)
-    // 1f when expanded, 0f when approaching collapsed state
-    val collapseFraction = (currentHeight - pinnedHeight) / (expandedHeight - pinnedHeight)
-    val contentAlpha = collapseFraction.coerceIn(0f, 1f)
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(currentHeight)
+            .statusBarsPadding()
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
@@ -77,88 +63,55 @@ fun RoTopAppBar(
                     )
                 )
             )
-            // Ensure status bar padding is applied to the container
-            .statusBarsPadding()
-            // Clip to bounds to hide scrolling content
-            .clip(androidx.compose.ui.graphics.RectangleShape)
     ) {
+        // Pinned toolbar content
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(pinnedHeight)
-                .align(Alignment.TopCenter)
-                .padding(horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
+                .wrapContentHeight()
+                .padding(16.dp)
+                .align(Alignment.Center),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
+            // Logo
             Image(
                 painter = painterResource(id = R.drawable.ic_logo),
                 contentDescription = "Logo",
                 modifier = Modifier
-                    .height(40.dp)
+                    .height(48.dp)
                     .clip(CircleShape)
-                    .clickable {
-                        showMessageDialog()
-                    },
+                    .clickable { showMessageDialog() },
                 contentScale = ContentScale.Fit
             )
 
+            // Notification button
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .clickable { onNotificationClick() },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Notifications,
+                    contentDescription = "Notifications",
+                    tint = Color.White,
+                    modifier = Modifier.size(24.dp)
+                )
 
-            // --- Right Actions ---
-            Row(verticalAlignment = Alignment.CenterVertically) {
-
-                // Nút Notification Container
-                Box(
-                    modifier = Modifier
-                        .size(56.dp)
-                        .clip(CircleShape)
-                        .clickable { onNotificationClick() },
-                    contentAlignment = Alignment.Center // Căn giữa icon chuông
-                ) {
-                    // 1. Icon Chuông
-                    Icon(
-                        imageVector = Icons.Default.Notifications,
-                        contentDescription = "Notifications",
-                        tint = Color.White,
-                        modifier = Modifier.size(24.dp)
+                if (hasNotification) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding( top = 10.dp,end = 10.dp)
+                            .size(10.dp)
+                            .background(Color.Red, CircleShape)
+                            .border(2.dp, Color.White, CircleShape)
                     )
-
-                    // 2. Chấm đỏ (Notification Dot)
-                    if (hasNotification) {
-                        Box(
-                            modifier = Modifier
-                                // Căn chỉnh vị trí chấm đỏ
-                                .align(Alignment.TopEnd) // Đưa về góc phải trên của box 56dp
-                                .padding(
-                                    top = 14.dp,
-                                    end = 14.dp
-                                ) // Dịch vào trong một chút cho đẹp
-                                .size(10.dp) // Kích thước chấm
-                                .background(Color.Red, CircleShape) // Màu đỏ, hình tròn
-                                .border(
-                                    1.dp,
-                                    Color.White,
-                                    CircleShape
-                                ) // (Tùy chọn) Viền trắng để tách biệt với nền
-                        )
-                    }
                 }
             }
         }
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .align(Alignment.BottomCenter)
-                .padding(top = 24.dp) // Slight padding from bottom
-                .graphicsLayer {
-                    alpha = contentAlpha
-                    // Optional: Parallax or slide effect
-                    translationY = -heightOffset / 2f
-                }
-        ) {
-            bottomContent()
-        }
     }
 }
 
