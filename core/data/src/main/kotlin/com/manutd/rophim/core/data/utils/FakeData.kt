@@ -1,9 +1,14 @@
 package com.manutd.rophim.core.data.utils
 
+import com.manutd.ronaldo.network.model.Actor
 import com.manutd.ronaldo.network.model.Channel
 import com.manutd.ronaldo.network.model.ChannelType
+import com.manutd.ronaldo.network.model.Gender
 import com.manutd.ronaldo.network.model.Group
 import com.manutd.ronaldo.network.model.HomeData
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 
 //fake data dựa theo response của rổ phim
 object FakeDataProvider {
@@ -13,17 +18,178 @@ object FakeDataProvider {
             color = "#38003C",
             description = "Ứng dụng xem phim trực tuyến hàng đầu",
             gridNumber = 2,
-            groups = listOf(
+            groups = persistentListOf(
                 getCarouselGroup(),
                 getHorizontalGroup("Phim Hành Động"),
                 getTopRankedGroup(),
                 getHorizontalGroup("Phim Hoạt Hình"),
                 getHorizontalGroup("Phim Kinh Dị"),
                 getHorizontalGroup("Phim Hài"),
+                getActorGroup()
             ),
             id = "home_001",
             image = "https://image.tmdb.org/t/p/original/backdrop.jpg",
             name = "Trang Chủ"
+        )
+    }
+
+    private fun getActorGroup(): Group {
+        return Group(
+            id = "actors_popular",
+            display = "horizontal",
+            name = "Diễn Viên Nổi Tiếng",
+            type = ChannelType.ACTOR,
+            remoteUrl = null,
+            channels = persistentListOf(),
+            actors = getPopularActors()
+        )
+    }
+
+    private fun getPopularActors(): ImmutableList<Actor> {
+        return persistentListOf(
+            // Vietnamese Actors
+            Actor(
+                id = "actor_001",
+                name = "Leonardo Dicaprio",
+                photoUrl = "https://numpaint.com/wp-content/uploads/2020/08/young-leonardo-dicaprio-paint-by-numbers.jpg",
+                gender = Gender.MALE,
+
+                ),
+            Actor(
+                id = "actor_002",
+                name = "Brad Pitt",
+                photoUrl = "https://hips.hearstapps.com/hmg-prod/images/actor-brad-pitt-arrives-for-the-premiere-of-the-mexican-news-photo-1591819497.jpg?crop=1.00xw:0.723xh;0,0.0233xh",
+                gender = Gender.MALE,
+
+                ),
+
+            // Hollywood Stars
+            Actor(
+                id = "actor_003",
+                name = "Tom Cruise",
+                photoUrl = "https://image.tmdb.org/t/p/original/eOh4ubpOm2Igdg0QH2ghj0mFtC.jpg",
+                gender = Gender.MALE,
+
+                ),
+            Actor(
+                id = "actor_004",
+                name = "Margot Robbie",
+                photoUrl = "https://image.tmdb.org/t/p/original/euDPyqLnuwaWMHajcU3oZ9uZezR.jpg",
+                gender = Gender.FEMALE,
+
+                ),
+            Actor(
+                id = "actor_005",
+                name = "Ryan Gosling",
+                photoUrl = "https://image.tmdb.org/t/p/original/lyUyVARQKhGxaxy0FbPJCQRpiaW.jpg",
+                gender = Gender.MALE,
+
+                ),
+            Actor(
+                id = "actor_006",
+                name = "Zendaya",
+                photoUrl = "https://image.tmdb.org/t/p/original/kg9ICat0odCQLnz5Qw8jOsz8q5y.jpg",
+                gender = Gender.FEMALE,
+
+                ),
+            Actor(
+                id = "actor_007",
+                name = "Tom Holland",
+                photoUrl = "https://image.tmdb.org/t/p/original/2qhIDp44cAqP2clOgt2afQI07X8.jpg",
+                gender = Gender.MALE,
+
+                ),
+            Actor(
+                id = "actor_008",
+                name = "Scarlett Johansson",
+                photoUrl = "https://image.tmdb.org/t/p/original/3JTEc2tGUact9c0WktvpeJ9pajn.jpg",
+                gender = Gender.FEMALE,
+
+                ),
+            Actor(
+                id = "actor_009",
+                name = "Chris Hemsworth",
+                photoUrl = "https://image.tmdb.org/t/p/original/jpurJ9jAcLCYjgHHfYF32m3zJYm.jpg",
+                gender = Gender.MALE,
+
+                ),
+            Actor(
+                id = "actor_010",
+                name = "Gal Gadot",
+                photoUrl = "https://image.tmdb.org/t/p/original/fysvehTvU6bE3JgxaOTRfvQJzJ4.jpg",
+                gender = Gender.FEMALE,
+
+                ),
+            Actor(
+                id = "actor_011",
+                name = "Jason Momoa",
+                photoUrl = "https://image.tmdb.org/t/p/original/6dEFBpZH8C8OijsynkSajQT99Pb.jpg",
+                gender = Gender.MALE,
+
+                ),
+            Actor(
+                id = "actor_012",
+                name = "Florence Pugh",
+                photoUrl = "https://image.tmdb.org/t/p/original/6Sjz9teWjrMY9lF2o9FCo4XmoRh.jpg",
+                gender = Gender.FEMALE,
+
+                ),
+            Actor(
+                id = "actor_013",
+                name = "Timothée Chalamet",
+                photoUrl = "https://image.tmdb.org/t/p/original/9j9X0fhfV9gPSOMCfCRmZKBx4pN.jpg",
+                gender = Gender.MALE,
+
+                ),
+            Actor(
+                id = "actor_014",
+                name = "Ana de Armas",
+                photoUrl = "https://image.tmdb.org/t/p/original/3vxvsmYLTf4jnr163SUlBIw51ee.jpg",
+                gender = Gender.FEMALE,
+
+                ),
+            Actor(
+                id = "actor_015",
+                name = "Pedro Pascal",
+                photoUrl = "https://image.tmdb.org/t/p/original/9VYK7oxcqhjd5LAH6ZFJ3XzOlID.jpg",
+                gender = Gender.MALE,
+
+                ),
+            Actor(
+                id = "actor_016",
+                name = "Anya Taylor-Joy",
+                photoUrl = "https://image.tmdb.org/t/p/original/yZpghhtKM2VZHDx6JGAZqAVU4qG.jpg",
+                gender = Gender.FEMALE,
+
+                ),
+            Actor(
+                id = "actor_017",
+                name = "Keanu Reeves",
+                photoUrl = "https://image.tmdb.org/t/p/original/rRdru6REr9i3WsMsNdwuGphjC3s.jpg",
+                gender = Gender.MALE,
+
+                ),
+            Actor(
+                id = "actor_018",
+                name = "Emma Stone",
+                photoUrl = "https://image.tmdb.org/t/p/original/wqEypkRUUZEcFmPV4O4JpZznmNk.jpg",
+                gender = Gender.FEMALE,
+
+                ),
+            Actor(
+                id = "actor_019",
+                name = "Dwayne Johnson",
+                photoUrl = "https://image.tmdb.org/t/p/original/5QApZVV8FUFlVxQpIK3Ew6cqotq.jpg",
+                gender = Gender.MALE,
+
+                ),
+            Actor(
+                id = "actor_020",
+                name = "Jennifer Lawrence",
+                photoUrl = "https://image.tmdb.org/t/p/original/r6iLqsVxDMhOPCL0yRQlLGkap2f.jpg",
+                gender = Gender.FEMALE,
+
+                )
         )
     }
 
@@ -34,7 +200,7 @@ object FakeDataProvider {
             name = "Trending Now",
             type = ChannelType.SLIDER,
             remoteUrl = null,
-            channels = listOf(
+            channels = persistentListOf(
                 Channel(
                     id = "movie_001",
                     name = "Titanic",
@@ -124,7 +290,7 @@ object FakeDataProvider {
             name = title,
             type = ChannelType.HORIZONTAL,
             remoteUrl = null,
-            channels = movieData
+            channels = movieData.toImmutableList()
         )
     }
 
@@ -135,7 +301,7 @@ object FakeDataProvider {
             name = "Top 10 Phim Được Xem Nhiều Nhất",
             type = ChannelType.TOP,
             remoteUrl = null,
-            channels = listOf(
+            channels = persistentListOf(
                 Channel(
                     id = "top_001",
                     name = "Breaking Bad",

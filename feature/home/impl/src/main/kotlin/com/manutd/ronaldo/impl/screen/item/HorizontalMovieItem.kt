@@ -5,7 +5,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -30,11 +29,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import com.manutd.ronaldo.designsystem.component.RoThumbnailImage
 import com.manutd.ronaldo.impl.utils.BadgeType
 import com.manutd.ronaldo.impl.utils.MovieBadge
-import com.manutd.ronaldo.impl.utils.MovieItemConstants
+import com.manutd.ronaldo.impl.utils.RoItemConstants
 import com.manutd.ronaldo.network.model.Channel
 import com.manutd.rophim.core.data.utils.FakeDataProvider
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 
 @Preview
 @Composable
@@ -53,29 +55,28 @@ fun HorizontalMovieItem(
     channel: Channel,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    badges: List<MovieBadge> = emptyList(),
+    badges: ImmutableList<MovieBadge> = persistentListOf(),
 ) {
     Column(
         modifier = modifier
-            .width(MovieItemConstants.HorizontalItemWidth)
+            .width(RoItemConstants.HorizontalItemWidth)
 
     ) {
-        val shape = RoundedCornerShape(MovieItemConstants.HorizontalCornerRadius)
+        val shape = RoundedCornerShape(RoItemConstants.HorizontalCornerRadius)
         Card(
             shape = shape,
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
             modifier = Modifier
                 .fillMaxWidth()
-                .height(MovieItemConstants.HorizontalItemHeight)
+                .height(RoItemConstants.HorizontalItemHeight)
                 .clip(shape)
                 .clickable(onClick = onClick)
         ) {
             Box {
                 // Thumbnail Image
-                AsyncImage(
+                RoThumbnailImage(
                     model = channel.logoUrl,
                     contentDescription = channel.name,
-                    contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize()
                 )
 
@@ -116,7 +117,7 @@ fun HorizontalMovieItem(
 
 @Composable
 private fun BadgesColumn(
-    badges: List<MovieBadge>,
+    badges: ImmutableList<MovieBadge>,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -139,14 +140,13 @@ private fun MovieBadgeItem(
         BadgeType.TIME_LIMIT -> Color(0xFF00BCD4).copy(alpha = 0.9f) // Cyan
         BadgeType.QUALITY -> Color(0xFF4CAF50).copy(alpha = 0.9f) // Green
         BadgeType.TRENDING -> Color(0xFFFF5722).copy(alpha = 0.9f) // Red
-        BadgeType.PROMOTION -> Color(0xFFFF9800).copy(alpha = 0.9f) // Orange
     }
 
     Box(
         modifier = modifier
             .background(
                 color = backgroundColor,
-                shape = RoundedCornerShape(MovieItemConstants.BadgeCornerRadius)
+                shape = RoundedCornerShape(RoItemConstants.BadgeCornerRadius)
             )
             .padding(horizontal = 6.dp, vertical = 3.dp)
     ) {

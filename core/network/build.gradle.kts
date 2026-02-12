@@ -10,9 +10,13 @@ android {
     }
     namespace = "com.manutd.rophim.core.network"
     testOptions.unitTests.isIncludeAndroidResources = true
+    defaultConfig {
+        consumerProguardFiles("consumer-rules.pro")
+    }
 }
 
 dependencies {
+    implementation(libs.kotlinx.collections.immutable)
     implementation(libs.androidx.tracing.ktx)
     api(libs.bundles.sandwich.networking)
     implementation(libs.coil.kt.network)

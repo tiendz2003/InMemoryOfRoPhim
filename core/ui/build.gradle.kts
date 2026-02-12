@@ -5,6 +5,9 @@ plugins {
 
 android {
     namespace = "com.manutd.ronaldo.core.ui"
+    defaultConfig {
+        consumerProguardFiles("consumer-rules.pro")
+    }
 }
 
 dependencies {

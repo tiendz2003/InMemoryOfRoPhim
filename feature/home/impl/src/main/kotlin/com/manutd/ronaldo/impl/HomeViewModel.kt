@@ -1,6 +1,5 @@
 package com.manutd.ronaldo.impl
 
-import android.util.Log
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.Fail
 import com.airbnb.mvrx.Loading
@@ -13,7 +12,7 @@ import com.airbnb.mvrx.hilt.MavericksViewModelComponent
 import com.airbnb.mvrx.hilt.ViewModelKey
 import com.airbnb.mvrx.hilt.hiltMavericksViewModelFactory
 import com.manutd.ronaldo.domain.GetHomeResourceUseCase
-import com.manutd.ronaldo.impl.utils.HomeSection
+import com.manutd.ronaldo.impl.utils.HomeSectionConfig
 import com.manutd.ronaldo.impl.utils.toHomeSections
 import dagger.Binds
 import dagger.Module
@@ -22,6 +21,7 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import dagger.hilt.InstallIn
 import dagger.multibindings.IntoMap
+import kotlinx.collections.immutable.ImmutableList
 
 class HomeViewModel @AssistedInject constructor(
     @Assisted initialState: MoviesState,
@@ -99,7 +99,7 @@ class HomeViewModel @AssistedInject constructor(
 }
 
 data class MoviesState(
-    val sections: Async<List<HomeSection>> = Uninitialized,
+    val sections: Async<ImmutableList<HomeSectionConfig>> = Uninitialized,
     val selectedChannelId: String? = null,
     val isRefreshing: Boolean = false
 ) : MavericksState {
@@ -112,12 +112,7 @@ data class MoviesState(
 
     val errorMessage: String?
         get() = (sections as? Fail)?.error?.message
-    val isUninitialized: Boolean
-        get() = sections is Uninitialized
 
-
-    val homeSections: List<HomeSection>
-        get() = sections() ?: emptyList()
 }
 
 @Module

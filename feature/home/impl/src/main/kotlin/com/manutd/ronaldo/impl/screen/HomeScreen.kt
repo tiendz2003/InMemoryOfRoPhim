@@ -41,9 +41,11 @@ import com.airbnb.mvrx.compose.collectAsStateWithLifecycle
 import com.manutd.ronaldo.designsystem.component.RoTopAppBar
 import com.manutd.ronaldo.designsystem.theme.RoTheme
 import com.manutd.ronaldo.impl.HomeViewModel
-import com.manutd.ronaldo.impl.utils.HomeSection
-import com.manutd.ronaldo.impl.utils.maverickViewModel.mavericksNav3ViewModel
+import com.manutd.ronaldo.impl.utils.HomeSectionConfig
+import com.manutd.ronaldo.impl.utils.mavericksNav3ViewModel
 import com.manutd.ronaldo.network.model.Channel
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 
 @Preview(showBackground = true)
 @Composable
@@ -100,13 +102,13 @@ fun HomeScreen(
 
             if (!sections.isNullOrEmpty()) {
                 HomeContent(
-                    sections = sections,
+                    sections = sections.toImmutableList(),
                     listState = listState,
                     onChannelClick = { channel ->
                         viewModel.selectChannel(channel.id)
                         onChannelClick(channel.id)
                     },
-                    contentPadding = PaddingValues(bottom = 100.dp)
+                    contentPadding = PaddingValues(bottom = 40.dp)
                 )
             } else if (state.isLoading) {
                 LoadingContent()
@@ -142,7 +144,7 @@ fun HomeScreen(
 
 @Composable
 private fun HomeContent(
-    sections: List<HomeSection>,
+    sections: ImmutableList<HomeSectionConfig>,
     listState: LazyListState,
     onChannelClick: (Channel) -> Unit,
     modifier: Modifier = Modifier,
@@ -160,20 +162,19 @@ private fun HomeContent(
             contentType = { it::class }
         ) { section ->
             when (section) {
-                is HomeSection.Carousel -> {
+                is HomeSectionConfig.Poster -> {
                     PosterSection(
                         modifier = Modifier,
-                        channels = section.channels,
+                        channels = section.channels.toImmutableList(),
                         onChannelClick = onChannelClick,
-                        autoScrollEnabled = section.autoScrollEnabled,
                         autoScrollDelayMs = section.autoScrollDelayMs
                     )
                 }
 
-                is HomeSection.HorizontalList -> {
+                is HomeSectionConfig.HorizontalList -> {
                     HorizontalListSection(
                         title = section.title,
-                        channels = section.channels,
+                        channels = section.channels.toImmutableList(),
                         onChannelClick = onChannelClick,
                         onSeeAllClick = if (section.showSeeAll) {
                             { /* Navigate to see all */ }
@@ -182,16 +183,27 @@ private fun HomeContent(
                     )
                 }
 
-                is HomeSection.TopRanked -> {
+                is HomeSectionConfig.TopRanked -> {
                     Log.d("HomeScreen", "TopRankedSection:${section.channels.size}")
                     TopRankedSection(
                         title = section.title,
-                        channels = section.channels,
+                        channels = section.channels.toImmutableList(),
                         onChannelClick = onChannelClick,
-                        onSeeAllClick = { /* Navigate to top ranked */ },
                         modifier = Modifier.padding(top = 24.dp)
                     )
                 }
+
+                is HomeSectionConfig.ActorList -> {
+                    ActorSection(
+                        title = section.title,
+                        actors = section.actors.toImmutableList(),
+                        onActorClick = { actor ->
+                            Log.d("HomeScreen", "Actor clicked: ${actor.name}")
+                        },
+                        modifier = Modifier.padding(top = 24.dp)
+                    )
+                }
+
             }
         }
     }

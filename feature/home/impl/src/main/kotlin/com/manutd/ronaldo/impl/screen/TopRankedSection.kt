@@ -35,6 +35,7 @@ import com.manutd.ronaldo.designsystem.theme.RoTheme
 import com.manutd.ronaldo.impl.screen.item.TopRankedMovieItem
 import com.manutd.ronaldo.network.model.Channel
 import com.manutd.rophim.core.data.utils.FakeDataProvider
+import kotlinx.collections.immutable.ImmutableList
 
 @Preview
 @Composable
@@ -54,7 +55,7 @@ fun TopRankedSectionPreview() {
 @Composable
 fun TopRankedSection(
     title: String,
-    channels: List<Channel>,
+    channels: ImmutableList<Channel>,
     onChannelClick: (Channel) -> Unit,
     modifier: Modifier = Modifier,
     onSeeAllClick: (() -> Unit)? = null
@@ -66,23 +67,22 @@ fun TopRankedSection(
             .background(
                 brush = Brush.verticalGradient(
                     colors = listOf(
-                        Color(0xFF006994), // Xanh nước biển đậm
+                        Color(0xFF006994),
                         Color.Transparent
                     ),
                     startY = 0f,
-                    endY = Float.POSITIVE_INFINITY // Gradient chiếm toàn bộ chiều cao
+                    endY = Float.POSITIVE_INFINITY
                 )
             )
     ) {
         SectionHeader(
             title = title,
             onSeeAllClick = onSeeAllClick,
-            modifier = Modifier.padding(horizontal = 16.dp)
+            modifier = Modifier.padding(16.dp)
         )
 
         Spacer(modifier = Modifier.height(12.dp))
 
-        // Top Ranked Items
         LazyRow(
             contentPadding = PaddingValues(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(16.dp)

@@ -1,7 +1,6 @@
 package com.manutd.ronaldo.impl.screen
 
 
-
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.animation.animateColorAsState
@@ -65,6 +64,8 @@ import com.skydoves.cloudy.cloudy
 import com.tbuonomo.viewpagerdotsindicator.compose.DotsIndicator
 import com.tbuonomo.viewpagerdotsindicator.compose.model.DotGraphic
 import com.tbuonomo.viewpagerdotsindicator.compose.type.ShiftIndicatorType
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
 import kotlinx.coroutines.delay
 import kotlin.math.absoluteValue
 
@@ -76,7 +77,7 @@ fun HeaderPreview() {
         disableDynamicTheming = true
     ) {
         PosterSection(
-            channels = listOf(
+            channels = persistentListOf(
                 Channel(
                     id = "1",
                     name = "Channel 1",
@@ -99,24 +100,21 @@ fun HeaderPreview() {
 
 @Composable
 fun PosterSection(
-    channels: List<Channel>,
+    channels: ImmutableList<Channel>,
     onChannelClick: (Channel) -> Unit,
     modifier: Modifier = Modifier,
-    autoScrollEnabled: Boolean = true,
     autoScrollDelayMs: Long = 3000L
 ) {
     if (channels.isEmpty()) return
 
-    // 1. CHUYỂN STATE RA NGOÀI (Vì nó không cần biết màn hình rộng bao nhiêu)
     val pagerState = rememberPagerState(
         initialPage = channels.size / 2,
         pageCount = { channels.size }
     )
     val isDragged by pagerState.interactionSource.collectIsDraggedAsState()
 
-    // 2. CHUYỂN LOGIC EFFECT RA NGOÀI
-    LaunchedEffect(autoScrollEnabled, channels.size) {
-        if (autoScrollEnabled && channels.size > 1) {
+    LaunchedEffect(channels.size, isDragged) {
+        if (channels.size > 1) {
             while (true) {
                 delay(autoScrollDelayMs)
                 if (!isDragged) {
@@ -164,7 +162,7 @@ fun PosterSection(
                     contentPadding = PaddingValues(
                         start = horizontalPadding,
                         end = horizontalPadding,
-                        top =120.dp,
+                        top = 120.dp,
                     ),
                     pageSize = PageSize.Fixed(cardWidth),
                     modifier = Modifier
@@ -240,11 +238,10 @@ private fun PosterItem(
         border = BorderStroke(2.dp, Color.White),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal =  24.dp)
+            .padding(horizontal = 24.dp)
             .aspectRatio(2f / 3f)
             .zIndex(if (pagerState.currentPage == page) 1f else 0f)
             .graphicsLayer {
-
 
 
                 translationX = pageOffset
@@ -400,7 +397,6 @@ private fun MovieTags(
 }
 
 
-
 enum class TagType { IMDB, QUALITY, SOLID, OUTLINE }
 
 @Composable
@@ -433,6 +429,7 @@ private fun Tag(
                     append(text)
                 }
             }
+
             else -> {
                 // Các loại khác: 1 màu duy nhất
                 val singleColor = if (type == TagType.SOLID) Color.Black else Color.White

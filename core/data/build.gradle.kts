@@ -8,6 +8,7 @@ android {
 }
 
 dependencies {
+    api(libs.kotlinx.collections.immutable)
     api(projects.core.common)
     /*api(projects.core.database)
     api(projects.core.datastore)*/

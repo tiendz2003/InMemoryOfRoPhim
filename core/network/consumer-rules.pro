@@ -1,0 +1,1 @@
+-keep class com.manutd.ronaldo.network.model.** { *; }

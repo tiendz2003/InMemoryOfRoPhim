@@ -1,7 +1,6 @@
 package com.manutd.ronaldo.impl.screen.item
 
-import androidx.compose.ui.graphics.nativeCanvas
-import com.manutd.ronaldo.impl.utils.MovieItemConstants
+import com.manutd.ronaldo.impl.utils.RoItemConstants
 
 
 import androidx.compose.foundation.BorderStroke
@@ -18,27 +17,19 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shadow
-import androidx.compose.ui.graphics.StrokeJoin
-import androidx.compose.ui.graphics.TransformOrigin
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
+import com.manutd.ronaldo.designsystem.component.RoThumbnailImage
 import com.manutd.ronaldo.designsystem.theme.RoTheme
-import com.manutd.ronaldo.impl.R
 import com.manutd.ronaldo.network.model.Channel
 
 @Preview
@@ -80,27 +71,26 @@ fun TopRankedMovieItem(
 ) {
     Column(
         modifier = modifier
-            .width(MovieItemConstants.TopRankedWidth)
+            .width(RoItemConstants.TopRankedWidth)
 
     ) {
         Box {
-            val shape = RoundedCornerShape(MovieItemConstants.TopRankedCornerRadius)
+            val shape = RoundedCornerShape(RoItemConstants.TopRankedCornerRadius)
             Card(
                 shape = shape,
                 border = BorderStroke(1.dp, Color.White),
                 elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(MovieItemConstants.TopRankedHeight)
+                    .height(RoItemConstants.TopRankedHeight)
                     .clip(shape)
                     .clickable(onClick = onClick)
             ) {
                 Box {
                     // Poster Image
-                    AsyncImage(
+                    RoThumbnailImage(
                         model = channel.logoUrl,
                         contentDescription = channel.name,
-                        contentScale = ContentScale.Crop,
                         modifier = Modifier.fillMaxSize()
                     )
 
@@ -161,7 +151,7 @@ private fun RankNumber(
     Text(
         modifier = modifier,
         text = rank.toString(),
-        fontSize = MovieItemConstants.TopRankNumberSize,
+        fontSize = RoItemConstants.TopRankNumberSize,
         fontWeight = FontWeight.Black,
         style = MaterialTheme.typography.displayMedium.copy(
             brush = goldGradient,
@@ -183,7 +173,7 @@ private fun AgeBadge(
         modifier = modifier
             .background(
                 color = Color.Black.copy(alpha = 0.7f),
-                shape = RoundedCornerShape(MovieItemConstants.BadgeCornerRadius)
+                shape = RoundedCornerShape(RoItemConstants.BadgeCornerRadius)
             )
             .padding(horizontal = 8.dp, vertical = 4.dp)
     ) {

@@ -1,37 +1,56 @@
 package com.manutd.ronaldo.network.model
 
 import android.R.attr.rating
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.persistentListOf
+import kotlinx.collections.immutable.toImmutableList
 import javax.annotation.concurrent.Immutable
+
+@Immutable
+data class Actor(
+    val id: String,
+    val name: String,
+    val photoUrl: String,
+    val gender: Gender,
+)
+
+enum class Gender(val displayName: String) {
+    MALE("Nam"),
+    FEMALE("Nữ"),
+    OTHER("Khác")
+}
 
 @Immutable
 data class HomeData(
     val color: String,
     val description: String,
     val gridNumber: Int,
-    val groups: List<Group>,
+    val groups: ImmutableList<Group>,
     val id: String,
     val image: String,
     val name: String,
 )
+
 @Immutable
 data class Group(
     val id: String,
     val display: String,
     val name: String?,
-    val channels: List<Channel>,
+    val channels: ImmutableList<Channel>,
     val remoteUrl: String?,
     val type: ChannelType = ChannelType.UNKNOWN,
-    // từ Group.RemoteData.url
+    val actors: ImmutableList<Actor> = persistentListOf()
 )
+
 @Immutable
 data class Channel(
     val id: String,
     val name: String,
     val display: String,
     val description: String,
-    val logoUrl: String,        // từ Channel.Image.url
-    val streamUrl: String,      // từ Channel.RemoteData.url
-    val shareUrl: String,       // từ Channel.Share.url
+    val logoUrl: String,
+    val streamUrl: String,
+    val shareUrl: String,
     val imdb: String,
     val quality: String,
     val rating: String,
@@ -43,58 +62,7 @@ enum class ChannelType {
     HORIZONTAL,
     SLIDER,
     TOP,
-    UNKNOWN
+    UNKNOWN,
+    ACTOR
 }
 
-
-fun HomeResponse.toDomain(): HomeData {
-    return HomeData(
-        color = color,
-        description = description,
-        gridNumber = gridNumber,
-        groups = groups.map { it.toDomain() },
-        id = id,
-        image = image.url,
-        name = name
-    )
-}
-
-fun HomeResponse.Group.toDomain(): Group {
-    val type = when (display.lowercase()) {
-        "horizontal" -> {
-            if (name?.contains("top", ignoreCase = true) == true) {
-                ChannelType.TOP
-            } else {
-                ChannelType.HORIZONTAL
-            }
-        }
-
-        "slider" -> ChannelType.SLIDER
-        else -> ChannelType.UNKNOWN
-    }
-    return Group(
-        id = id,
-        display = display,
-        name = name,
-        channels = channels.map { it.toDomain() },
-        remoteUrl = remoteData?.url,
-        type = type
-    )
-}
-
-fun HomeResponse.Group.Channel.toDomain(): Channel {
-    return Channel(
-        id = id,
-        name = name,
-        display = display,
-        description = description,
-        logoUrl = image.url,
-        streamUrl = remoteData.url,
-        shareUrl = share.url,
-        imdb = "7.0",
-        quality = "HD",
-        rating = "3.5",
-        year = "2025",
-        episode = "34"
-    )
-}

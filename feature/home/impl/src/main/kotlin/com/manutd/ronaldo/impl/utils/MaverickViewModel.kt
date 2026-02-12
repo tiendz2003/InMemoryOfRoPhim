@@ -1,4 +1,4 @@
-package com.manutd.ronaldo.impl.utils.maverickViewModel
+package com.manutd.ronaldo.impl.utils
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember

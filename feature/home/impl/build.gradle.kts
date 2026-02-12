@@ -6,7 +6,9 @@ plugins {
 android {
     namespace = "com.manutd.ronaldo.impl"
     testOptions.unitTests.isIncludeAndroidResources = true
-
+    defaultConfig {
+        consumerProguardFiles("consumer-rules.pro")
+    }
 }
 
 dependencies {

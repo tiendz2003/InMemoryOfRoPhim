@@ -17,11 +17,13 @@ import com.manutd.ronaldo.impl.screen.item.HorizontalMovieItem
 import com.manutd.ronaldo.impl.utils.BadgeType
 import com.manutd.ronaldo.impl.utils.MovieBadge
 import com.manutd.ronaldo.network.model.Channel
+import kotlinx.collections.immutable.ImmutableList
+import kotlinx.collections.immutable.toImmutableList
 
 @Composable
 fun HorizontalListSection(
     title: String,
-    channels: List<Channel>,
+    channels: ImmutableList<Channel>,
     onChannelClick: (Channel) -> Unit,
     modifier: Modifier = Modifier,
     onSeeAllClick: (() -> Unit)? = null
@@ -51,7 +53,7 @@ fun HorizontalListSection(
                 HorizontalMovieItem(
                     channel = channel,
                     onClick = { onChannelClick(channel) },
-                    badges = badges,
+                    badges = badges.toImmutableList(),
                 )
             }
         }
