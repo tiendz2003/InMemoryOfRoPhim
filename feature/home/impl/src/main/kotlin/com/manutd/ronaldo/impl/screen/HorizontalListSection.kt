@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.manutd.ronaldo.impl.screen.item.HorizontalMovieItem
@@ -44,10 +45,13 @@ fun HorizontalListSection(
                 items = channels,
                 key = { _, channel -> channel.id }
             ) { index, channel ->
+                val badges = remember(channel.id, channel.rating, channel.episode, channel.quality) {
+                    getBadgesForChannel(channel)
+                }
                 HorizontalMovieItem(
                     channel = channel,
                     onClick = { onChannelClick(channel) },
-                    badges = getBadgesForChannel(channel),
+                    badges = badges,
                 )
             }
         }
@@ -55,16 +59,12 @@ fun HorizontalListSection(
 }
 private fun getBadgesForChannel(channel: Channel): List<MovieBadge> {
     return buildList {
-        channel.rating?.let {
-            add(MovieBadge("PĐ-$it", BadgeType.AGE_RATING))
-        }
-        channel.episode?.let {
+        add(MovieBadge("PĐ-${channel.rating}", BadgeType.AGE_RATING))
+        channel.episode.let {
             if (it.contains("tập")) {
                 add(MovieBadge("LT-28", BadgeType.TIME_LIMIT))
             }
         }
-        channel.quality?.let {
-            add(MovieBadge(it, BadgeType.QUALITY))
-        }
+        add(MovieBadge(channel.quality, BadgeType.QUALITY))
     }
 }

@@ -1,5 +1,6 @@
 package com.manutd.ronaldo.impl.utils
 
+import androidx.compose.runtime.Immutable
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.manutd.ronaldo.network.model.Channel
@@ -62,16 +63,15 @@ object MovieItemConstants {
     val TopRankNumberSize = 72.sp
 
     // Horizontal
-    val HorizontalItemWidth = 160.dp
-    val HorizontalItemHeight = 90.dp
+    val HorizontalItemWidth = 140.dp
+    val HorizontalItemHeight = 200.dp
     val HorizontalCornerRadius = 8.dp
 
     // Common
     val BadgePadding = 6.dp
-    val BadgeCornerRadius = 4.dp
+    val BadgeCornerRadius = 16.dp
 }
-
-// File: MovieBadge.kt
+@Immutable
 data class MovieBadge(
     val text: String,
     val type: BadgeType

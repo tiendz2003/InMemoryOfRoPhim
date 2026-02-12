@@ -20,10 +20,13 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
@@ -31,6 +34,19 @@ import com.manutd.ronaldo.impl.utils.BadgeType
 import com.manutd.ronaldo.impl.utils.MovieBadge
 import com.manutd.ronaldo.impl.utils.MovieItemConstants
 import com.manutd.ronaldo.network.model.Channel
+import com.manutd.rophim.core.data.utils.FakeDataProvider
+
+@Preview
+@Composable
+fun HorizontalMovieItemPreview() {
+    val channel = FakeDataProvider.getHomeData().groups.first()
+        .channels.first()
+    HorizontalMovieItem(
+        channel = channel,
+        onClick = {},
+    )
+
+}
 
 @Composable
 fun HorizontalMovieItem(
@@ -42,14 +58,17 @@ fun HorizontalMovieItem(
     Column(
         modifier = modifier
             .width(MovieItemConstants.HorizontalItemWidth)
-            .clickable(onClick = onClick)
+
     ) {
+        val shape = RoundedCornerShape(MovieItemConstants.HorizontalCornerRadius)
         Card(
-            shape = RoundedCornerShape(MovieItemConstants.HorizontalCornerRadius),
+            shape = shape,
             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(MovieItemConstants.HorizontalItemHeight)
+                .clip(shape)
+                .clickable(onClick = onClick)
         ) {
             Box {
                 // Thumbnail Image
@@ -62,10 +81,10 @@ fun HorizontalMovieItem(
 
                 // Badges Row (Top Left)
                 if (badges.isNotEmpty()) {
-                    BadgesRow(
+                    BadgesColumn(
                         badges = badges,
                         modifier = Modifier
-                            .align(Alignment.TopStart)
+                            .align(Alignment.BottomStart)
                             .padding(6.dp)
                     )
                 }
@@ -75,23 +94,34 @@ fun HorizontalMovieItem(
 
         Text(
             text = channel.name,
-            style = MaterialTheme.typography.bodySmall,
+            style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Medium,
             color = Color.White,
-            maxLines = 2,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.fillMaxWidth()
+        )
+        Text(
+            text = channel.display,
+            style = MaterialTheme.typography.bodySmall,
+            color = Color.White,
+            textAlign = TextAlign.Center,
+            maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.fillMaxWidth()
         )
     }
 }
+
 @Composable
-private fun BadgesRow(
+private fun BadgesColumn(
     badges: List<MovieBadge>,
     modifier: Modifier = Modifier
 ) {
-    Row(
+    Column(
         modifier = modifier,
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
+        verticalArrangement = Arrangement.spacedBy(4.dp)
     ) {
         badges.forEach { badge ->
             MovieBadgeItem(badge = badge)

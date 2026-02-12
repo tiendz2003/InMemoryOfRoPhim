@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
@@ -80,17 +81,19 @@ fun TopRankedMovieItem(
     Column(
         modifier = modifier
             .width(MovieItemConstants.TopRankedWidth)
-            .clickable(onClick = onClick)
+
     ) {
         Box {
-            // Movie Poster Card
+            val shape = RoundedCornerShape(MovieItemConstants.TopRankedCornerRadius)
             Card(
-                shape = RoundedCornerShape(MovieItemConstants.TopRankedCornerRadius),
+                shape = shape,
                 border = BorderStroke(1.dp, Color.White),
                 elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(MovieItemConstants.TopRankedHeight)
+                    .clip(shape)
+                    .clickable(onClick = onClick)
             ) {
                 Box {
                     // Poster Image

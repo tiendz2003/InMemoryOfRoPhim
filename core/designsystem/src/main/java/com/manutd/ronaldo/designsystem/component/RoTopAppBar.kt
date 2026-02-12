@@ -50,16 +50,17 @@ fun RoTopAppBar(
     onNotificationClick: () -> Unit,
 ) {
 
-
+    val color = MaterialTheme.colorScheme.onPrimary
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .statusBarsPadding()
             .background(
                 brush = Brush.verticalGradient(
-                    colors = listOf(
-                        Color(0xFF38003C),
-                        Color.Transparent
+                    colorStops = arrayOf(
+                        0.0f to color,              // 0%: Bắt đầu là màu gốc
+                        0.9f to Color.Transparent,  // 80%: Đã chuyển sang trong suốt hoàn toàn
+                        1.0f to Color.Transparent   // 100%: Vẫn trong suốt (để chắc chắn)
                     )
                 )
             )

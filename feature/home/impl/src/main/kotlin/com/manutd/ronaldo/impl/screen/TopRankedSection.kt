@@ -29,6 +29,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.manutd.ronaldo.designsystem.component.RoIcon
+import com.manutd.ronaldo.designsystem.icon.RoIcons
 import com.manutd.ronaldo.designsystem.theme.RoTheme
 import com.manutd.ronaldo.impl.screen.item.TopRankedMovieItem
 import com.manutd.ronaldo.network.model.Channel
@@ -100,7 +102,7 @@ fun TopRankedSection(
 }
 
 @Composable
- fun SectionHeader(
+fun SectionHeader(
     title: String,
     onSeeAllClick: (() -> Unit)?,
     modifier: Modifier = Modifier
@@ -119,8 +121,8 @@ fun TopRankedSection(
 
         if (onSeeAllClick != null) {
             TextButton(onClick = onSeeAllClick) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                RoIcon(
+                    icon = RoIcons.ArrowRight,
                     contentDescription = "See all",
                     tint = Color.White,
                     modifier = Modifier.size(24.dp)

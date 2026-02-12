@@ -3,7 +3,7 @@ package com.manutd.ronaldo.network.model
 import android.R.attr.rating
 import javax.annotation.concurrent.Immutable
 
-
+@Immutable
 data class HomeData(
     val color: String,
     val description: String,
@@ -13,7 +13,7 @@ data class HomeData(
     val image: String,
     val name: String,
 )
-
+@Immutable
 data class Group(
     val id: String,
     val display: String,
@@ -32,11 +32,11 @@ data class Channel(
     val logoUrl: String,        // từ Channel.Image.url
     val streamUrl: String,      // từ Channel.RemoteData.url
     val shareUrl: String,       // từ Channel.Share.url
-    val imdb: String? = null,
-    val quality: String? = null,
-    val rating: String? = null,
-    val year: String? = null,
-    val episode: String? = null
+    val imdb: String,
+    val quality: String,
+    val rating: String,
+    val year: String,
+    val episode: String
 )
 
 enum class ChannelType {

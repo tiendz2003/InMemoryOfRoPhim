@@ -1,36 +1,32 @@
 package com.manutd.ronaldo.impl.screen
 
 
-import android.util.Log
+
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.collectIsDraggedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
-import androidx.compose.foundation.layout.defaultMinSize
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
@@ -38,12 +34,12 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextFieldDefaults.contentPadding
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -53,11 +49,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.lerp
 import androidx.compose.ui.util.lerp
 import androidx.compose.ui.zIndex
 import coil3.compose.AsyncImage
@@ -65,10 +61,10 @@ import com.manutd.ronaldo.designsystem.component.RoButton
 import com.manutd.ronaldo.designsystem.theme.GoldGradient
 import com.manutd.ronaldo.designsystem.theme.RoTheme
 import com.manutd.ronaldo.network.model.Channel
+import com.skydoves.cloudy.cloudy
 import com.tbuonomo.viewpagerdotsindicator.compose.DotsIndicator
 import com.tbuonomo.viewpagerdotsindicator.compose.model.DotGraphic
 import com.tbuonomo.viewpagerdotsindicator.compose.type.ShiftIndicatorType
-import customBlur
 import kotlinx.coroutines.delay
 import kotlin.math.absoluteValue
 
@@ -79,7 +75,7 @@ fun HeaderPreview() {
         androidTheme = true,
         disableDynamicTheming = true
     ) {
-        CarouselSection(
+        PosterSection(
             channels = listOf(
                 Channel(
                     id = "1",
@@ -102,7 +98,7 @@ fun HeaderPreview() {
 }
 
 @Composable
-fun CarouselSection(
+fun PosterSection(
     channels: List<Channel>,
     onChannelClick: (Channel) -> Unit,
     modifier: Modifier = Modifier,
@@ -111,25 +107,14 @@ fun CarouselSection(
 ) {
     if (channels.isEmpty()) return
 
+    // 1. CHUYỂN STATE RA NGOÀI (Vì nó không cần biết màn hình rộng bao nhiêu)
     val pagerState = rememberPagerState(
         initialPage = channels.size / 2,
         pageCount = { channels.size }
     )
     val isDragged by pagerState.interactionSource.collectIsDraggedAsState()
 
-    val configuration = LocalConfiguration.current
-    val screenWidth = configuration.screenWidthDp.dp
-    val cardWidth = 260.dp
-
-    // Tính toán chiều cao cho Pager:
-    // Card Width = 260.dp -> Card Height (tỉ lệ 2:3) = 390.dp
-    // Padding trong Item = 24.dp * 2 (trên dưới) = 48.dp
-    // Padding top của Pager = 120.dp
-    // => Tổng chiều cao an toàn khoảng 560.dp -> 580.dp
-    val pagerHeight = 580.dp
-
-    val horizontalPadding = (screenWidth - cardWidth) / 2
-
+    // 2. CHUYỂN LOGIC EFFECT RA NGOÀI
     LaunchedEffect(autoScrollEnabled, channels.size) {
         if (autoScrollEnabled && channels.size > 1) {
             while (true) {
@@ -145,99 +130,121 @@ fun CarouselSection(
         }
     }
 
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
+    // 3. BoxWithConstraints CHỈ DÙNG ĐỂ TÍNH TOÁN UI
+    BoxWithConstraints(
+        modifier = modifier.fillMaxWidth() // Áp dụng modifier tham số vào đây
     ) {
-        val currentChannel = channels.getOrNull(pagerState.currentPage)
+        // Các biến này phụ thuộc vào maxWidth nên để ở trong là đúng
+        val screenWidth = maxWidth
+        val cardWidth = 260.dp
+        val horizontalPadding = (screenWidth - cardWidth) / 2
 
-        // Blur Background
-        BlurBackground(
-            imageUrl = currentChannel?.logoUrl,
-            modifier = Modifier.matchParentSize()
-        )
-        //poster và thông tin phim
-        Column(
-            modifier = Modifier.fillMaxWidth(),
+        // Tính toán chiều cao
+        val cardHeight = cardWidth * 3f / 2f
+        val verticalPadding = 32.dp
+        val pagerHeight = cardHeight + verticalPadding * 2
+
+        // UI Content
+        Box(
+            modifier = Modifier.fillMaxWidth()
         ) {
-            // HorizontalPager
-            HorizontalPager(
-                state = pagerState,
-                contentPadding = PaddingValues(
-                    start = horizontalPadding,
-                    end = horizontalPadding,
-                    top = 120.dp // Giữ padding top để tránh TopBar
-                ),
-                pageSize = PageSize.Fixed(cardWidth),
-                modifier = Modifier.fillMaxWidth().height(pagerHeight),
-                beyondViewportPageCount = 2
-            ) { page ->
-                val channel = channels[page]
-                CarouselItem(
-                    channel = channel,
-                    pagerState = pagerState,
-                    page = page,
-                    onClick = { onChannelClick(channel) }
-                )
-            }
+            val currentChannel = channels.getOrNull(pagerState.currentPage)
 
-            // Info Section
+            // Blur Background
+            BlurBackground(
+                imageUrl = currentChannel?.logoUrl,
+                modifier = Modifier.matchParentSize()
+            )
+
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 32.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                modifier = Modifier.fillMaxWidth(),
             ) {
-                MovieInfoSection(
-                    channel = currentChannel,
-                    modifier = Modifier.padding(horizontal = 32.dp)
-                )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                DotsIndicator(
-                    modifier = Modifier.height(10.dp),
-                    dotCount = pagerState.pageCount,
-                    type = ShiftIndicatorType(
-                        dotsGraphic = DotGraphic(
-                            color = Color.White,
-                            size = 8.dp,
-                            borderWidth = 1.dp,
-                            borderColor = Color.White.copy(0.5f)
-                        )
+                HorizontalPager(
+                    state = pagerState,
+                    contentPadding = PaddingValues(
+                        start = horizontalPadding,
+                        end = horizontalPadding,
+                        top =120.dp,
                     ),
-                    pagerState = pagerState,
-                )
+                    pageSize = PageSize.Fixed(cardWidth),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(pagerHeight),
+                    beyondViewportPageCount = 1
+                ) { page ->
+                    val channel = channels[page]
+                    PosterItem(
+                        channel = channel,
+                        pagerState = pagerState,
+                        page = page,
+                        onClick = { onChannelClick(channel) }
+                    )
+                }
 
+                // Info Section
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    MovieInfoSection(
+                        channel = currentChannel,
+                        modifier = Modifier.padding(horizontal = 32.dp)
+                    )
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    DotsIndicator(
+                        modifier = Modifier.height(10.dp),
+                        dotCount = pagerState.pageCount,
+                        type = ShiftIndicatorType(
+                            dotsGraphic = DotGraphic(
+                                color = Color.White,
+                                size = 8.dp,
+                                borderWidth = 1.dp,
+                                borderColor = Color.White.copy(0.5f)
+                            )
+                        ),
+                        pagerState = pagerState,
+                    )
+                }
             }
         }
-
     }
 }
 
 @Composable
-private fun CarouselItem(
+private fun PosterItem(
     channel: Channel,
     pagerState: PagerState,
     page: Int,
     onClick: () -> Unit
 ) {
+    val pageOffset = remember(pagerState.currentPage, pagerState.currentPageOffsetFraction, page) {
+        (pagerState.currentPage - page) + pagerState.currentPageOffsetFraction
+    }
+
+    val transformations = remember(pageOffset) {
+        val absOffset = pageOffset.absoluteValue
+        object {
+            val scale = lerp(0.85f, 1f, 1f - absOffset.coerceIn(0f, 1f))
+            val alpha = lerp(0.6f, 1f, 1f - absOffset.coerceIn(0f, 1f))
+            val rotationY = -pageOffset.coerceIn(-1f, 1f) * 20f
+        }
+    }
+
     Card(
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
         border = BorderStroke(2.dp, Color.White),
         modifier = Modifier
             .fillMaxWidth()
-            .padding(24.dp)
+            .padding(horizontal =  24.dp)
             .aspectRatio(2f / 3f)
             .zIndex(if (pagerState.currentPage == page) 1f else 0f)
             .graphicsLayer {
-                val pageOffset =
-                    (pagerState.currentPage - page) + pagerState.currentPageOffsetFraction
-                val absOffset = pageOffset.absoluteValue
 
-                val scale = lerp(0.85f, 1f, 1f - absOffset.coerceIn(0f, 1f))
-                val alphaVal = lerp(0.6f, 1f, 1f - absOffset.coerceIn(0f, 1f))
 
 
                 translationX = pageOffset
@@ -246,9 +253,9 @@ private fun CarouselItem(
                 val rotationFactor = 20f
                 rotationY = -pageOffset.coerceIn(-1f, 1f) * rotationFactor
 
-                scaleX = scale
-                scaleY = scale
-                alpha = alphaVal
+                scaleX = transformations.scale
+                scaleY = transformations.scale
+                alpha = transformations.alpha
 
                 cameraDistance = 12 * density
                 transformOrigin = TransformOrigin.Center
@@ -270,22 +277,24 @@ private fun BlurBackground(
     modifier: Modifier = Modifier
 ) {
     if (imageUrl == null) return
-
-    Box(modifier = modifier) {
+    val color = MaterialTheme.colorScheme.onPrimary
+    key(imageUrl) {
         AsyncImage(
             model = imageUrl,
             contentDescription = null,
             contentScale = ContentScale.Crop,
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxSize()
-                .customBlur(20.dp)
+                .cloudy(32)
                 .drawWithCache {
-                    val gradient = Brush.verticalGradient(
-                        colors = listOf(
-                            Color.Transparent,
-                            Color.Black.copy(alpha = 0.3f),
-                            Color(0xFF38003C).copy(alpha = 0.7f),
-                            Color(0xFF38003C)
+                    val gradientOverlay = Brush.verticalGradient(
+                        colorStops = arrayOf(
+                            0.0f to Color.Transparent,
+                            0.4f to Color.Black.copy(alpha = 0.15f),
+                            0.6f to Color.Black.copy(alpha = 0.3f),
+                            0.75f to color.copy(alpha = 0.6f),
+                            0.9f to color.copy(alpha = 0.85f),
+                            1.0f to color
                         ),
                         startY = 0f,
                         endY = size.height
@@ -293,8 +302,7 @@ private fun BlurBackground(
 
                     onDrawWithContent {
                         drawContent()
-                        // Vẽ gradient overlay từ dưới lên
-                        drawRect(brush = gradient)
+                        drawRect(brush = gradientOverlay)
                     }
                 }
         )
@@ -339,7 +347,7 @@ private fun MovieInfoSection(
         ) {
             // Watch button
             RoButton(
-                text = "Xem",
+                text = "Xem phim",
                 onClick = { /* Navigate to watch */ },
                 modifier = Modifier.weight(1f),
                 icon = Icons.Default.PlayArrow,
@@ -391,6 +399,8 @@ private fun MovieTags(
     }
 }
 
+
+
 enum class TagType { IMDB, QUALITY, SOLID, OUTLINE }
 
 @Composable
@@ -399,22 +409,54 @@ private fun Tag(
     type: TagType,
     modifier: Modifier = Modifier
 ) {
-    val backgroundColor = when (type) {
-        TagType.IMDB -> Color(0xFFF5C518)
-        TagType.QUALITY -> Color(0xFF00C853)
-        TagType.SOLID -> Color.DarkGray
-        TagType.OUTLINE -> Color.Transparent
+    val imdbYellow = Color(0xFFF5C518)
+    val shape = RoundedCornerShape(4.dp)
+
+    // 1. Xác định Style cho Container (Background & Border)
+    val (backgroundColor, borderColor) = when (type) {
+        TagType.SOLID -> Color.White to null            // Nền trắng, không viền
+        TagType.OUTLINE -> Color.Transparent to Color.White // Nền trong, viền trắng
+        TagType.IMDB -> Color.Transparent to imdbYellow     // Nền trong, viền vàng
+        TagType.QUALITY -> Color(0xFF00C853) to null    // Nền xanh, không viền
     }
 
+    // 2. Xây dựng nội dung Text đa màu sắc (Rich Text)
+    val styledText = buildAnnotatedString {
+        when (type) {
+            TagType.IMDB -> {
+                // Phần 1: "IMDB " màu Vàng
+                withStyle(style = SpanStyle(color = imdbYellow, fontWeight = FontWeight.Bold)) {
+                    append("IMDB ")
+                }
+                // Phần 2: Điểm số (text) màu Trắng
+                withStyle(style = SpanStyle(color = Color.White)) {
+                    append(text)
+                }
+            }
+            else -> {
+                // Các loại khác: 1 màu duy nhất
+                val singleColor = if (type == TagType.SOLID) Color.Black else Color.White
+                withStyle(style = SpanStyle(color = singleColor)) {
+                    append(text)
+                }
+            }
+        }
+    }
+
+    // 3. Render UI
     Box(
         modifier = modifier
-            .background(backgroundColor, RoundedCornerShape(4.dp))
+            .then(
+                if (borderColor != null) Modifier.border(1.dp, borderColor, shape)
+                else Modifier
+            )
+            .background(backgroundColor, shape)
             .padding(horizontal = 8.dp, vertical = 4.dp)
     ) {
         Text(
-            text = text,
+            text = styledText, // Sử dụng AnnotatedString
             style = MaterialTheme.typography.labelSmall,
-            color = if (type == TagType.OUTLINE) Color.White else Color.Black
+            fontWeight = FontWeight.Medium
         )
     }
 }

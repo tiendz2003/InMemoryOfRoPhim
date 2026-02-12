@@ -1,5 +1,6 @@
 package com.manutd.ronaldo.designsystem.icon
 
+import androidx.annotation.DrawableRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
 import androidx.compose.material.icons.automirrored.rounded.ShortText
@@ -18,10 +19,13 @@ import androidx.compose.material.icons.rounded.Search
 import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material.icons.rounded.Upcoming
 import androidx.compose.material.icons.rounded.ViewDay
+import androidx.compose.ui.graphics.vector.ImageVector
+import com.manutd.rophim.core.designsystem.R
 
 object RoIcons {
     val Add = Icons.Rounded.Add
     val ArrowBack = Icons.AutoMirrored.Rounded.ArrowBack
+
     val Bookmark = Icons.Rounded.Bookmark
     val BookmarkBorder = Icons.Rounded.BookmarkBorder
     val Bookmarks = Icons.Rounded.Bookmarks
@@ -37,4 +41,13 @@ object RoIcons {
     val Upcoming = Icons.Rounded.Upcoming
     val UpcomingBorder = Icons.Outlined.Upcoming
     val ViewDay = Icons.Rounded.ViewDay
+    val ArrowRight = IconType.Drawable(R.drawable.ic_arrow_right)
+}
+
+sealed class IconType {
+    // Dùng cho icon có sẵn của Material Design
+    data class Vector(val imageVector: ImageVector) : IconType()
+
+    // Dùng cho icon XML trong file drawable
+    data class Drawable(@DrawableRes val id: Int) : IconType()
 }

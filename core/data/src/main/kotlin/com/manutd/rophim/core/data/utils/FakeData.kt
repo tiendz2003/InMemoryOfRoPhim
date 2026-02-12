@@ -5,7 +5,7 @@ import com.manutd.ronaldo.network.model.ChannelType
 import com.manutd.ronaldo.network.model.Group
 import com.manutd.ronaldo.network.model.HomeData
 
-
+//fake data dựa theo response của rổ phim
 object FakeDataProvider {
 
     fun getHomeData(): HomeData {
@@ -17,7 +17,7 @@ object FakeDataProvider {
                 getCarouselGroup(),
                 getHorizontalGroup("Phim Hành Động"),
                 getTopRankedGroup(),
-                getHorizontalGroup("Phim Tình Cảm"),
+                getHorizontalGroup("Phim Hoạt Hình"),
                 getHorizontalGroup("Phim Kinh Dị"),
                 getHorizontalGroup("Phim Hài"),
             ),
@@ -112,7 +112,7 @@ object FakeDataProvider {
     private fun getHorizontalGroup(title: String): Group {
         val movieData = when (title) {
             "Phim Hành Động" -> getActionMovies()
-            "Phim Tình Cảm" -> getRomanticMovies()
+            "Phim Hoạt Hình" -> getAnimationMovies()
             "Phim Kinh Dị" -> getHorrorMovies()
             "Phim Hài" -> getComedyMovies()
             else -> getActionMovies()
@@ -355,76 +355,219 @@ object FakeDataProvider {
         )
     }
 
-    private fun getRomanticMovies(): List<Channel> {
+    private fun getAnimationMovies(): List<Channel> {
         return listOf(
+            // Studio Ghibli Films
             Channel(
-                id = "romance_001",
-                name = "Love Again",
-                display = "Love Again: Yêu Lại Lần Nữa",
-                description = "Mira Ray, đang đối phó với cái chết của hôn phu, gửi một loạt tin nhắn lãng mạn đến số điện thoại cũ của anh - không biết rằng số đó đã được gán cho Rob Burns.",
-                logoUrl = "https://image.tmdb.org/t/p/original/prKq88nice9Fo43C9kP0fWEh3wX.jpg",
-                streamUrl = "https://example.com/stream/love_again.m3u8",
-                shareUrl = "https://example.com/share/love_again",
+                id = "animation_001",
+                name = "Spirited Away",
+                display = "Spirited Away: Vùng Đất Linh Hồn",
+                description = "Chihiro, một cô bé 10 tuổi, bước vào thế giới kỳ ảo của các vị thần và phù thủy khi cha mẹ cô bị biến thành lợn. Cô phải làm việc trong nhà t목욕 của phù thủy Yubaba để giải cứu gia đình.",
+                logoUrl = "https://image.tmdb.org/t/p/original/39wmItIWsg5sZMyRUHLkWBcuVCM.jpg",
+                streamUrl = "https://example.com/stream/spirited_away.m3u8",
+                shareUrl = "https://example.com/share/spirited_away",
+                imdb = "8.6",
+                quality = "HD",
+                rating = "4.8",
+                year = "2001",
+                episode = "Film"
+            ),
+            Channel(
+                id = "animation_002",
+                name = "My Neighbor Totoro",
+                display = "My Neighbor Totoro: Hàng Xóm Của Tôi Là Totoro",
+                description = "Hai chị em Satsuki và Mei chuyển đến vùng nông thôn và phát hiện ra thế giới kỳ diệu của các sinh vật rừng, đặc biệt là Totoro, một linh hồn rừng khổng lồ và thân thiện.",
+                logoUrl = "https://image.tmdb.org/t/p/original/rtGDOeG9LzoerkDGZF9dnVeLppL.jpg",
+                streamUrl = "https://example.com/stream/totoro.m3u8",
+                shareUrl = "https://example.com/share/totoro",
+                imdb = "8.2",
+                quality = "HD",
+                rating = "4.7",
+                year = "1988",
+                episode = "Film"
+            ),
+            Channel(
+                id = "animation_003",
+                name = "Howl's Moving Castle",
+                display = "Howl's Moving Castle: Lâu Đài Di Động Của Howl",
+                description = "Sophie bị biến thành một bà lão 90 tuổi bởi lời nguyền của Phù thủy Hoang Mạc. Cô tìm đến lâu đài di động của phù thủy Howl để tìm cách phá lời nguyền.",
+                logoUrl = "https://m.media-amazon.com/images/I/81M0Eewr7QL._AC_UF894,1000_QL80_.jpg",
+                streamUrl = "https://example.com/stream/howls_castle.m3u8",
+                shareUrl = "https://example.com/share/howls_castle",
+                imdb = "8.2",
+                quality = "HD",
+                rating = "4.7",
+                year = "2004",
+                episode = "Film"
+            ),
+            Channel(
+                id = "animation_004",
+                name = "Princess Mononoke",
+                display = "Princess Mononoke: Công Chúa Mononoke",
+                description = "Ashitaka, một hoàng tử trẻ, bị nguyền rủa và phải tìm cách chữa trị. Anh gặp San, một cô gái sống cùng sói, trong cuộc chiến giữa con người và thần linh rừng.",
+                logoUrl = "https://image.tmdb.org/t/p/original/cMYCDADoLKLbB83g4WnJegaZimC.jpg",
+                streamUrl = "https://example.com/stream/mononoke.m3u8",
+                shareUrl = "https://example.com/share/mononoke",
+                imdb = "8.4",
+                quality = "HD",
+                rating = "4.7",
+                year = "1997",
+                episode = "Film"
+            ),
+            Channel(
+                id = "animation_005",
+                name = "Ponyo",
+                display = "Ponyo: Cô Bé Cá Vàng Trên Vách Đá",
+                description = "Ponyo, một cá vàng kỳ diệu, muốn trở thành người sau khi kết bạn với Sosuke, một cậu bé 5 tuổi. Tình bạn của họ đe dọa cân bằng tự nhiên của thế giới.",
+                logoUrl = "https://m.media-amazon.com/images/M/MV5BZDkzMzQ5ZmQtOTA3MC00MjhiLTk5M2UtNzk0MjEzZmVjN2UxXkEyXkFqcGc@._V1_.jpg",
+                streamUrl = "https://example.com/stream/ponyo.m3u8",
+                shareUrl = "https://example.com/share/ponyo",
+                imdb = "7.7",
+                quality = "HD",
+                rating = "4.3",
+                year = "2008",
+                episode = "Film"
+            ),
+
+            // Disney Pixar Films
+            Channel(
+                id = "animation_006",
+                name = "Encanto",
+                display = "Encanto: Vùng Đất Phép Thuật",
+                description = "Mirabel là thành viên duy nhất trong gia đình Madrigal không có phép thuật. Khi ngôi nhà kỳ diệu của họ gặp nguy hiểm, cô phát hiện rằng mình có thể là hy vọng cuối cùng.",
+                logoUrl = "https://image.tmdb.org/t/p/original/4j0PNHkMr5ax3IA8tjtxcmPU3QT.jpg",
+                streamUrl = "https://example.com/stream/encanto.m3u8",
+                shareUrl = "https://example.com/share/encanto",
                 imdb = "7.2",
-                quality = "HD",
-                rating = "3.8",
-                year = "2023",
+                quality = "4K",
+                rating = "4.5",
+                year = "2021",
                 episode = "Film"
             ),
             Channel(
-                id = "romance_002",
-                name = "Your Place or Mine",
-                display = "Your Place or Mine: Nhà Bạn Hay Nhà Tôi",
-                description = "Hai người bạn thân lâu năm hoán đổi nhà cho nhau trong một tuần, chỉ để phát hiện ra rằng cuộc sống mà họ đã hoán đổi là hoàn hảo cho nhau.",
-                logoUrl = "https://image.tmdb.org/t/p/original/8aflwPBssr8brgxtsFwTdRSCQmV.jpg",
-                streamUrl = "https://example.com/stream/your_place_or_mine.m3u8",
-                shareUrl = "https://example.com/share/your_place_or_mine",
-                imdb = "6.8",
-                quality = "HD",
-                rating = "3.5",
-                year = "2023",
+                id = "animation_007",
+                name = "Coco",
+                display = "Coco: Hội Ngộ Diệu Kỳ",
+                description = "Miguel, một cậu bé yêu âm nhạc, vô tình bước vào Xứ Sở Người Chết và phải tìm cách trở về trước khi quá muộn, đồng thời khám phá bí mật gia đình.",
+                logoUrl = "https://image.tmdb.org/t/p/original/gGEsBPAijhVUFoiNpgZXqRVWJt2.jpg",
+                streamUrl = "https://example.com/stream/coco.m3u8",
+                shareUrl = "https://example.com/share/coco",
+                imdb = "8.4",
+                quality = "4K",
+                rating = "4.8",
+                year = "2017",
                 episode = "Film"
             ),
             Channel(
-                id = "romance_003",
-                name = "A Tourist's Guide to Love",
-                display = "A Tourist's Guide to Love: Hướng Dẫn Du Lịch Tình Yêu",
-                description = "Sau một vụ sa thải tàn khốc, Amanda đến Việt Nam trong một chuyến du lịch và gặp một hướng dẫn viên đáng yêu khiến cô nhìn lại cuộc sống.",
-                logoUrl = "https://image.tmdb.org/t/p/original/ao3sDJPWwe8WGOovLz48o8CuVTM.jpg",
-                streamUrl = "https://example.com/stream/tourists_guide_love.m3u8",
-                shareUrl = "https://example.com/share/tourists_guide_love",
+                id = "animation_008",
+                name = "Moana",
+                display = "Moana: Hành Trình Của Moana",
+                description = "Moana, con gái của tù trưởng, lên đường tìm kiếm nữ thần Te Fiti cùng Maui, một vị thần nửa người để cứu hòn đảo của cô khỏi lời nguyền đen tối.",
+                logoUrl = "https://image.tmdb.org/t/p/original/4JeejGugONWpJkbnvL12hVoYEDa.jpg",
+                streamUrl = "https://example.com/stream/moana.m3u8",
+                shareUrl = "https://example.com/share/moana",
+                imdb = "7.6",
+                quality = "4K",
+                rating = "4.4",
+                year = "2016",
+                episode = "Film"
+            ),
+            Channel(
+                id = "animation_009",
+                name = "Frozen",
+                display = "Frozen: Nữ Hoàng Băng Giá",
+                description = "Anna lên đường tìm chị gái Elsa, người có sức mạnh băng tuyết đã vô tình biến vương quốc thành mùa đông vĩnh cửu, để cứu vương quốc Arendelle.",
+                logoUrl = "https://image.tmdb.org/t/p/original/kgwjIb2JDHRhNk13lmSxiClFjVk.jpg",
+                streamUrl = "https://example.com/stream/frozen.m3u8",
+                shareUrl = "https://example.com/share/frozen",
+                imdb = "7.4",
+                quality = "4K",
+                rating = "4.3",
+                year = "2013",
+                episode = "Film"
+            ),
+            Channel(
+                id = "animation_010",
+                name = "Turning Red",
+                display = "Turning Red: Biến Đỏ",
+                description = "Mei Lee, một cô gái 13 tuổi tự tin, phát hiện ra rằng cô biến thành một con gấu trúc đỏ khổng lồ bất cứ khi nào cô quá phấn khích. Cô phải cân bằng giữa việc làm một cô gái tuổi teen và di sản gia đình.",
+                logoUrl = "https://image.tmdb.org/t/p/original/qsdjk9oAKSQMWs0Vt5Pyfh6O4GZ.jpg",
+                streamUrl = "https://example.com/stream/turning_red.m3u8",
+                shareUrl = "https://example.com/share/turning_red",
                 imdb = "7.0",
-                quality = "HD",
-                rating = "3.7",
-                year = "2023",
+                quality = "4K",
+                rating = "4.1",
+                year = "2022",
                 episode = "Film"
             ),
             Channel(
-                id = "romance_004",
-                name = "The Perfect Find",
-                display = "The Perfect Find: Tìm Kiếm Hoàn Hảo",
-                description = "Sau một cuộc chia tay công khai, một biên tập viên thời trang trở lại công việc và phải làm việc với một người đàn ông trẻ quyến rũ.",
-                logoUrl = "https://image.tmdb.org/t/p/original/sUoRpT4yFbNvNqrSjFZNQvYj7qU.jpg",
-                streamUrl = "https://example.com/stream/perfect_find.m3u8",
-                shareUrl = "https://example.com/share/perfect_find",
-                imdb = "6.9",
-                quality = "HD",
-                rating = "3.6",
-                year = "2023",
+                id = "animation_011",
+                name = "Soul",
+                display = "Soul: Cuộc Sống Nhiệm Màu",
+                description = "Joe Gardner, một giáo viên âm nhạc, có giấc mơ trở thành nhạc sĩ jazz. Sau một tai nạn, linh hồn anh bị tách khỏi cơ thể và anh phải tìm đường trở lại Trái Đất.",
+                logoUrl = "https://image.tmdb.org/t/p/original/hm58Jw4Lw8OIeECIq5qyPYhAeRJ.jpg",
+                streamUrl = "https://example.com/stream/soul.m3u8",
+                shareUrl = "https://example.com/share/soul",
+                imdb = "8.0",
+                quality = "4K",
+                rating = "4.6",
+                year = "2020",
                 episode = "Film"
             ),
             Channel(
-                id = "romance_005",
-                name = "Through My Window 3",
-                display = "Through My Window 3: Looking at You",
-                description = "Raquel và Ares phải đối mặt với những thách thức mới trong mối quan hệ của họ khi họ cố gắng cân bằng giữa tình yêu và ước mơ cá nhân.",
-                logoUrl = "https://image.tmdb.org/t/p/original/6xdEjtaSo2ag0cTEGlJPNFRLgY.jpg",
-                streamUrl = "https://example.com/stream/through_window_3.m3u8",
-                shareUrl = "https://example.com/share/through_window_3",
-                imdb = "7.1",
-                quality = "HD",
-                rating = "3.8",
-                year = "2024",
+                id = "animation_012",
+                name = "Luca",
+                display = "Luca: Mùa Hè Của Luca",
+                description = "Luca, một quái vật biển trẻ, trải nghiệm một mùa hè khó quên trên bờ biển Ý. Anh kết bạn với Alberto và cùng nhau khám phá thị trấn, che giấu bí mật thật sự của mình.",
+                logoUrl = "https://image.tmdb.org/t/p/original/620hnMVLu6RSZW6a5rwO8gqpt0t.jpg",
+                streamUrl = "https://example.com/stream/luca.m3u8",
+                shareUrl = "https://example.com/share/luca",
+                imdb = "7.4",
+                quality = "4K",
+                rating = "4.2",
+                year = "2021",
+                episode = "Film"
+            ),
+            Channel(
+                id = "animation_013",
+                name = "Raya and the Last Dragon",
+                display = "Raya Và Rồng Thần Cuối Cùng",
+                description = "Trong thế giới giả tưởng Kumandra, chiến binh Raya phải tìm rồng cuối cùng để đoàn kết các vương quốc chia rẽ và đánh bại lực lượng tà ác đe dọa thế giới.",
+                logoUrl = "https://image.tmdb.org/t/p/original/lPsD10PP4rgUGiGR4CCXA6iY0QQ.jpg",
+                streamUrl = "https://example.com/stream/raya.m3u8",
+                shareUrl = "https://example.com/share/raya",
+                imdb = "7.3",
+                quality = "4K",
+                rating = "4.3",
+                year = "2021",
+                episode = "Film"
+            ),
+            Channel(
+                id = "animation_014",
+                name = "The Incredibles",
+                display = "The Incredibles: Gia Đình Siêu Nhân",
+                description = "Bob Parr đã từng là siêu anh hùng vĩ đại nhất. 15 năm sau, anh và vợ Helen sống cuộc sống bình thường với 3 con. Nhưng khi nguy hiểm xuất hiện, gia đình phải hành động.",
+                logoUrl = "https://image.tmdb.org/t/p/original/2LqaLgk4Z226KkgPJuiOQ58wvrm.jpg",
+                streamUrl = "https://example.com/stream/incredibles.m3u8",
+                shareUrl = "https://example.com/share/incredibles",
+                imdb = "8.0",
+                quality = "4K",
+                rating = "4.6",
+                year = "2004",
+                episode = "Film"
+            ),
+            Channel(
+                id = "animation_015",
+                name = "Finding Nemo",
+                display = "Finding Nemo: Đi Tìm Nemo",
+                description = "Marlin, một chú cá hề, lên đường tìm con trai Nemo qua đại dương. Trên đường đi, anh gặp Dory, một chú cá bị mất trí nhớ nhưng luôn lạc quan.",
+                logoUrl = "https://image.tmdb.org/t/p/original/eHuGQ10FUzK1mdOY69wF5pGgEf5.jpg",
+                streamUrl = "https://example.com/stream/finding_nemo.m3u8",
+                shareUrl = "https://example.com/share/finding_nemo",
+                imdb = "8.2",
+                quality = "4K",
+                rating = "4.7",
+                year = "2003",
                 episode = "Film"
             )
         )

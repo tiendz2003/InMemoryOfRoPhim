@@ -19,6 +19,9 @@ dependencies {
     api(libs.androidx.compose.runtime)
     api(libs.androidx.compose.ui.util)
     api(libs.dotsindicator)
+    api(libs.androidx.lifecycle.runtimeCompose)
+    api(libs.androidx.lifecycle.viewModelCompose)
+    api(libs.compose.cloudy)
     implementation(libs.coil.kt.network)
     implementation(libs.coil.kt.compose)
 
