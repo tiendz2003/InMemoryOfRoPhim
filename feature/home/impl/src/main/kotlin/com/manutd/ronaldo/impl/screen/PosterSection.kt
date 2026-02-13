@@ -257,6 +257,7 @@ private fun PosterItem(
                 cameraDistance = 12 * density
                 transformOrigin = TransformOrigin.Center
             }
+            .clip(RoundedCornerShape(16.dp))
             .clickable(onClick = onClick)
     ) {
         AsyncImage(

@@ -62,8 +62,6 @@ fun RoApp(
     modifier: Modifier = Modifier,
     windowAdaptiveInfo: WindowAdaptiveInfo = currentWindowAdaptiveInfo(),
 ) {
-    val shouldShowGradientBackground = appState.navigationState.currentTopLevelKey == HomeNavKey
-    var showMessageDialog by rememberSaveable { mutableStateOf(false) }
 
     RoBackground(modifier = modifier) {
         val snackbarHostState = remember { SnackbarHostState() }
@@ -81,17 +79,10 @@ fun RoApp(
             }
         }
         CompositionLocalProvider(LocalSnackbarHostState provides snackbarHostState) {
-            RoApp(
+            ROApp(
                 appState = appState,
                 modifier = modifier,
                 windowAdaptiveInfo = windowAdaptiveInfo,
-                onLogoClick = {
-                    showMessageDialog = true
-                },
-                onMessageDismissed = {
-                    showMessageDialog = false
-                },
-                showMessageDialog = showMessageDialog
             )
         }
     }
@@ -107,21 +98,14 @@ val LocalSnackbarHostState = compositionLocalOf<SnackbarHostState> {
     ExperimentalComposeUiApi::class,
     ExperimentalMaterial3AdaptiveApi::class,
 )
-internal fun RoApp(
+internal fun ROApp(
     appState: RoAppState,
     modifier: Modifier = Modifier,
-    showMessageDialog: Boolean,
-    onLogoClick: () -> Unit,
-    onMessageDismissed: () -> Unit,
     windowAdaptiveInfo: WindowAdaptiveInfo = currentWindowAdaptiveInfo(),
 ) {
     val snackbarHostState = LocalSnackbarHostState.current
 
     val navigator = remember { Navigator(appState.navigationState) }
-    if (showMessageDialog) {
-        //todo:show message dialog and dismiss
-
-    }
     RoNavigationSuiteScaffold(
         navigationSuiteItems = {
             TOP_LEVEL_NAV_ITEMS.forEach { (navKey, navItem) ->
