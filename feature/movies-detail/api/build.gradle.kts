@@ -3,6 +3,5 @@ plugins {
 }
 
 android {
-    namespace = "com.manutd.ronaldo.api"
+    namespace = "com.ronaldo.rophim.api"
 }
-
