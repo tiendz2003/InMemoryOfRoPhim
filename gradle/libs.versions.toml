@@ -36,7 +36,8 @@ activity = "1.12.3"
 constraintlayout = "2.1.4"
 kotlinxCoroutines = "1.10.2"
 cloudy = "0.5.0"
-
+exoPlayer = "1.9.2"
+media3DatasourceOkhttp = "1.9.2"
 [libraries]
 compose-cloudy = { module = "com.github.skydoves:cloudy", version.ref = "cloudy" }
 
@@ -130,6 +131,13 @@ androidx-activity = { group = "androidx.activity", name = "activity", version.re
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
 
 javax-inject = { module = "javax.inject:javax.inject", version = "1" }
+
+#exoplayer
+exoplayer-core = { group = "androidx.media3", name = "media3-exoplayer", version.ref = "exoPlayer" }
+exoplayer-dash = { group = "androidx.media3", name = "media3-exoplayer-dash", version.ref = "exoPlayer" }
+exoplayer-ui = { group = "androidx.media3", name = "media3-ui", version.ref = "exoPlayer" }
+exoplayer-compose = { group = "androidx.media3", name = "media3-ui-compose", version.ref = "exoPlayer" }
+androidx-media3-datasource-okhttp = { group = "androidx.media3", name = "media3-datasource-okhttp", version.ref = "media3DatasourceOkhttp" }
 [plugins]
 kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
@@ -150,7 +158,10 @@ base-jvm-library = { id = "base.jvm.library" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 rophim-android-feature-api = { id = "rophim.android.feature.api" }
 rophim-android-feature-impl = { id = "rophim.android.feature.impl" }
+
+
 [bundles]
+exoplayer = ["exoplayer-core", "exoplayer-dash", "exoplayer-ui", "exoplayer-compose"]
 androidx-compose-ui-test = ["androidx-compose-ui-test", "androidx-compose-ui-testManifest"]
 
 androidx-navigation3-host = [
