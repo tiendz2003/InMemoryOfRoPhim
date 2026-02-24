@@ -1,4 +1,4 @@
-package com.manutd.ronaldo.impl.utils
+package com.manutd.rophim
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -13,7 +13,7 @@ import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.compose.mavericksViewModel
 
 @Composable
-inline fun <reified VM : MavericksViewModel<S>, reified S : MavericksState> mavericksNav3ViewModel(
+inline fun <reified VM : MavericksViewModel<S>, reified S : MavericksState> mavericksViewModel(
     noinline keyFactory: (() -> String)? = null,
     noinline argsFactory: (() -> Any?)? = null,
 ): VM {

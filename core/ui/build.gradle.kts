@@ -14,14 +14,15 @@ android {
 }
 
 dependencies {
-    implementation(libs.bundles.exoplayer)
+    api(libs.bundles.exoplayer)
     api(projects.core.model)
     api(projects.core.designsystem)
-    api(libs.mavericks)
+    api(libs.bundles.maverick)
     api(libs.coil.kt.network)
     api(libs.coil.kt.compose)
     api(libs.coil)
     implementation(libs.androidx.media3.datasource.okhttp)
+
 
     /* androidTestImplementation(libs.bundles.androidx.compose.ui.test)
      androidTestImplementation(projects.core.testing)*/

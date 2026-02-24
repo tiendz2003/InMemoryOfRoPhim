@@ -42,7 +42,7 @@ import com.manutd.ronaldo.designsystem.component.RoTopAppBar
 import com.manutd.ronaldo.designsystem.theme.RoTheme
 import com.manutd.ronaldo.impl.HomeViewModel
 import com.manutd.ronaldo.impl.utils.HomeSectionConfig
-import com.manutd.ronaldo.impl.utils.mavericksNav3ViewModel
+import com.manutd.rophim.mavericksViewModel
 import com.manutd.ronaldo.network.model.Channel
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
@@ -69,7 +69,7 @@ fun HomeScreen(
     onNotificationClick: () -> Unit,
     onLogoClick: () -> Unit,
     modifier: Modifier = Modifier,
-    viewModel: HomeViewModel = mavericksNav3ViewModel()
+    viewModel: HomeViewModel = mavericksViewModel()
 ) {
     val state by viewModel.collectAsStateWithLifecycle()
     val listState = rememberLazyListState()
