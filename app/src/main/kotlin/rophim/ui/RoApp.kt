@@ -53,6 +53,7 @@ import com.manutd.ronaldo.designsystem.theme.LightDefaultColorScheme
 import com.manutd.ronaldo.impl.navigation.homeEntry
 import com.manutd.ronaldo.navigation.Navigator
 import com.manutd.ronaldo.navigation.toEntries
+import com.ronaldo.rophim.navigation.moviesDetailEntry
 import rophim.navigation.TOP_LEVEL_NAV_ITEMS
 
 
@@ -163,14 +164,17 @@ internal fun ROApp(
                     ),
             ) {
                 Box(
-                    modifier = Modifier.systemBarsPadding().consumeWindowInsets(
-                        WindowInsets.safeDrawing.only(WindowInsetsSides.Top)
-                    ),
+                    modifier = Modifier
+                        .systemBarsPadding()
+                        .consumeWindowInsets(
+                            WindowInsets.safeDrawing.only(WindowInsetsSides.Top)
+                        ),
                 ) {
                     val listDetailStrategy = rememberListDetailSceneStrategy<NavKey>()
 
                     val entryProvider = entryProvider {
                         homeEntry(navigator)
+                        moviesDetailEntry(navigator)
                     }
 
                     NavDisplay(

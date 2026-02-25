@@ -1,4 +1,4 @@
-package com.ronaldo.rophim
+package com.ronaldo.rophim.screen
 
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
@@ -7,12 +7,20 @@ import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.hilt.AssistedViewModelFactory
+import com.airbnb.mvrx.hilt.MavericksViewModelComponent
+import com.airbnb.mvrx.hilt.ViewModelKey
 import com.airbnb.mvrx.hilt.hiltMavericksViewModelFactory
 import com.manutd.rophim.ExoPlayerManager
+import dagger.Binds
+import dagger.Module
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import dagger.hilt.InstallIn
+import dagger.multibindings.IntoMap
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class MoviesDetailViewModel @AssistedInject constructor(
@@ -62,8 +70,10 @@ class MoviesDetailViewModel @AssistedInject constructor(
                     uiState = TrailerUiState.Buffering
                 )
             }
-            exoPlayerManager.prepareMedia(url)
-            player.play()
+            viewModelScope.launch(Dispatchers.Main) {
+                exoPlayerManager.prepareMedia(url)
+                player.play()
+            }
         }
     }
 
@@ -72,12 +82,15 @@ class MoviesDetailViewModel @AssistedInject constructor(
     }
 
     fun onVisibilityChanged(isVisible: Boolean) {
-        withState { s ->
-            when {
-                !isVisible && player.isPlaying -> player.pause()
-                isVisible && !player.isPlaying &&
-                        (s.uiState is TrailerUiState.Playing || s.uiState is TrailerUiState.Buffering)
-                    -> player.play()
+        withState { state ->
+            viewModelScope.launch(Dispatchers.Main) {
+                when {
+                    !isVisible && player.isPlaying -> player.pause()
+
+                    isVisible &&
+                            !player.isPlaying &&
+                            (state.uiState is TrailerUiState.Playing || state.uiState is TrailerUiState.Buffering) -> player.play()
+                }
             }
         }
     }
@@ -90,7 +103,9 @@ class MoviesDetailViewModel @AssistedInject constructor(
     }
 
     @AssistedFactory
-    interface Factory : AssistedViewModelFactory<MoviesDetailViewModel, DetailState>
+    interface Factory : AssistedViewModelFactory<MoviesDetailViewModel, DetailState> {
+        override fun create(state: DetailState): MoviesDetailViewModel
+    }
 
     companion object : MavericksViewModelFactory<MoviesDetailViewModel, DetailState>
     by hiltMavericksViewModelFactory()
@@ -107,4 +122,14 @@ sealed class TrailerUiState {
     object Playing : TrailerUiState()
     object Ended : TrailerUiState()
     data class Error(val message: String) : TrailerUiState()
+}
+
+@Module
+@InstallIn(MavericksViewModelComponent::class) // 1. Cài đặt vào Component riêng của Mavericks
+interface DetailViewModelModule {
+
+    @Binds
+    @IntoMap // 2. Đưa vào Map (để sửa cái lỗi MissingBinding Map kia)
+    @ViewModelKey(MoviesDetailViewModel::class) // 3. Định danh Key là class ViewModel của bạn
+    fun bindHomeViewModelFactory(factory: MoviesDetailViewModel.Factory): AssistedViewModelFactory<*, *>
 }

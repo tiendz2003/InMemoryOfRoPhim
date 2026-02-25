@@ -5,13 +5,12 @@ import androidx.navigation3.runtime.NavKey
 import com.manutd.ronaldo.api.HomeNavKey
 import com.manutd.ronaldo.impl.screen.HomeScreen
 import com.manutd.ronaldo.navigation.Navigator
+import com.ronaldo.rophim.api.navigateToDetail
 
 fun EntryProviderScope<NavKey>.homeEntry(navigator: Navigator) {
     entry<HomeNavKey> {
         HomeScreen(
-            onChannelClick = { channelId ->
-                //   navigator.navigateToDetail(channelId)
-            },
+            onChannelClick = navigator::navigateToDetail,
             onNotificationClick = {
                 //todo:Navigate sang màn thông báo
                 navigator.navigate(HomeNavKey)

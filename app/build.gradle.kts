@@ -42,6 +42,8 @@ android {
 dependencies {
     implementation(projects.feature.home.api)
     implementation(projects.feature.home.impl)
+    implementation(projects.feature.moviesDetail.api)
+    implementation(projects.feature.moviesDetail.impl)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.coroutines.guava)
     ksp(libs.hilt.compiler)

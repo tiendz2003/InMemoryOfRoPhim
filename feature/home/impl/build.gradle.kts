@@ -19,6 +19,7 @@ dependencies {
 
     implementation(projects.core.domain)
     implementation(projects.feature.home.api)
+    implementation(projects.feature.moviesDetail.api)
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
     testImplementation(libs.hilt.android.testing)
