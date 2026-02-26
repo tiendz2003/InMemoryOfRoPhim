@@ -1,5 +1,6 @@
 package com.ronaldo.rophim.screen
 
+import androidx.annotation.OptIn
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -37,6 +39,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
 import androidx.media3.ui.PlayerView
@@ -56,6 +59,7 @@ fun MoviesDetailScreen(
     onNavigateToWatch: () -> Unit,
     detailViewModel: MoviesDetailViewModel = mavericksViewModel()
 ) {
+    val state by detailViewModel.collectAsStateWithLifecycle()
     val listState = rememberLazyListState()
     val isTrailerVisible by remember() {
         derivedStateOf {
@@ -66,7 +70,6 @@ fun MoviesDetailScreen(
             // Chưa scroll quá ngưỡng — dùng layoutInfo để lấy height thực
             val itemHeight = listState.layoutInfo.visibleItemsInfo
                 .firstOrNull { it.index == 0 }?.size ?: Int.MAX_VALUE
-
             // Pause khi đã scroll qua 40% chiều cao item
             offset < (itemHeight * 0.4f).toInt()
         }
@@ -77,8 +80,11 @@ fun MoviesDetailScreen(
                 trailerUrl = movie.trailerUrl,
                 thumbnailUrl = movie.posterUrl,
                 isVisible = isTrailerVisible,
-                onWatchClick = onNavigateToWatch,
-                detailViewModel = detailViewModel
+                uiState = state.uiState,
+                player = detailViewModel.player,
+                onLoadTrailer = detailViewModel::loadTrailer,
+                onVisibilityChanged = detailViewModel::onVisibilityChanged,
+                onRetry = detailViewModel::retry,
             )
         }
     }
@@ -89,75 +95,65 @@ fun TrailerPlayer(
     trailerUrl: String,
     thumbnailUrl: String,
     isVisible: Boolean,
+    uiState: TrailerUiState, // Nhận state từ cha
+    player: ExoPlayer,       // Nhận player từ cha
     modifier: Modifier = Modifier,
-    onWatchClick: () -> Unit = {},
-    detailViewModel: MoviesDetailViewModel
+    onLoadTrailer: (String) -> Unit,
+    onVisibilityChanged: (Boolean) -> Unit,
+    onRetry: () -> Unit,
 ) {
-    val state by detailViewModel.collectAsStateWithLifecycle()
-    //Load trailer 1 lần chỉ khi nó thay đổi
     LaunchedEffect(trailerUrl) {
-        detailViewModel.loadTrailer(trailerUrl)
+        onLoadTrailer(trailerUrl)
     }
+
     LaunchedEffect(isVisible) {
-        detailViewModel.onVisibilityChanged(isVisible)
+        onVisibilityChanged(isVisible)
     }
+
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner) {
-        //đăng ký lifecycle để theo dõi trạng thái
         val observer = LifecycleEventObserver { _, event ->
             when (event) {
-                Lifecycle.Event.ON_PAUSE -> detailViewModel.onVisibilityChanged(false)
-                Lifecycle.Event.ON_RESUME -> detailViewModel.onVisibilityChanged(true)
+                Lifecycle.Event.ON_PAUSE -> onVisibilityChanged(false)
+                Lifecycle.Event.ON_RESUME -> onVisibilityChanged(true)
                 else -> {}
             }
         }
         lifecycleOwner.lifecycle.addObserver(observer)
         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
+
     Box(
         modifier = modifier
             .fillMaxWidth()
             .aspectRatio(16f / 9f)
             .background(Color.Black)
     ) {
-        PlayerViewSection(player = detailViewModel.player)
+        PlayerViewSection(player = player)
 
-        // Layer 2: Thumbnail overlay với fade animation
-        ThumbnailOverlay(
-            thumbnailUrl = thumbnailUrl,
-            uiState = state.uiState
-        )
+        ThumbnailOverlay(thumbnailUrl = thumbnailUrl, uiState = uiState)
 
-        // Layer 3: Spinner — chỉ visible khi Buffering
         AnimatedVisibility(
-            visible = state.uiState is TrailerUiState.Buffering,
-            enter = fadeIn(tween(200)),
-            exit = fadeOut(tween(200)),
+            visible = uiState is TrailerUiState.Buffering,
+            enter = fadeIn(tween(200)), exit = fadeOut(tween(200)),
             modifier = Modifier.align(Alignment.Center)
         ) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(36.dp),
-                color = Color.White,
-                strokeWidth = 2.dp
-            )
+            CircularProgressIndicator(color = Color.White, modifier = Modifier.size(36.dp))
         }
 
-        // Layer 4: Error overlay
         AnimatedVisibility(
-            visible = state.uiState is TrailerUiState.Error,
-            enter = fadeIn(tween(200)),
-            exit = fadeOut(tween(200)),
+            visible = uiState is TrailerUiState.Error,
+            enter = fadeIn(tween(200)), exit = fadeOut(tween(200)),
             modifier = Modifier.fillMaxSize()
         ) {
-            val errorMessage = (state.uiState as? TrailerUiState.Error)?.message ?: ""
-            ErrorOverlay(
-                message = errorMessage,
-                onRetry = detailViewModel::retry
-            )
+            val errorMessage = (uiState as? TrailerUiState.Error)?.message ?: "Đã có lỗi xảy ra"
+            ErrorOverlay(message = errorMessage, onRetry = onRetry)
         }
+
     }
 }
 
+@OptIn(UnstableApi::class)
 @Composable
 private fun PlayerViewSection(player: ExoPlayer) {
     //đảm bảo androidview chỉ tạo lại khi player instance thay đổi

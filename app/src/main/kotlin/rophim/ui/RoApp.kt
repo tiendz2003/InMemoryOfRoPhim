@@ -31,10 +31,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -44,12 +41,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
-import com.manutd.ronaldo.api.HomeNavKey
 import com.manutd.ronaldo.designsystem.component.RoBackground
-import com.manutd.ronaldo.designsystem.component.RoTopAppBar
 import com.manutd.ronaldo.designsystem.component.RoNavigationSuiteScaffold
 import com.manutd.ronaldo.designsystem.theme.LightAndroidBackgroundTheme
-import com.manutd.ronaldo.designsystem.theme.LightDefaultColorScheme
 import com.manutd.ronaldo.impl.navigation.homeEntry
 import com.manutd.ronaldo.navigation.Navigator
 import com.manutd.ronaldo.navigation.toEntries
