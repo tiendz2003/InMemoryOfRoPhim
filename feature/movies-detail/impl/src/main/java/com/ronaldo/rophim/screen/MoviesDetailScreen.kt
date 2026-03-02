@@ -37,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
@@ -52,6 +53,7 @@ import com.airbnb.mvrx.Loading
 import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsStateWithLifecycle
 import com.manutd.ronaldo.designsystem.component.ShimmerBox
+import com.manutd.ronaldo.designsystem.theme.RoTheme
 import com.manutd.rophim.mavericksViewModel
 
 val AppYellow = Color(0xFFF5C518)
@@ -61,6 +63,20 @@ val SurfaceDark = Color(0xFF1A1A1A)
 val TextPrimary = Color(0xFFFFFFFF)
 val TextSecondary = Color(0xFFAAAAAA)
 val OrangeAiring = Color(0xFFFF8C00)
+
+
+
+
+@Preview(showBackground = true)
+@Composable
+fun MoviesDetailScreenPreview() {
+    RoTheme(){
+        MoviesDetailScreen(
+            onNavigateToWatch = {},
+            onNavigateBack = {},
+        )
+    }
+}
 
 @Composable
 fun MoviesDetailScreen(
@@ -108,7 +124,7 @@ fun MoviesDetailScreen(
                 )
             }
             // ── Item 2: Movie Info ──────────────────────────────
-          /*  item(key = "movie_info") {
+            item(key = "movie_info") {
                 MovieInfoSection(
                     state = state,
                     onSynopsisDetailClick = viewModel::toggleSynopsisSheet
@@ -132,7 +148,7 @@ fun MoviesDetailScreen(
                     onAudioTrackSelected = viewModel::onAudioTrackSelected,
                     onEpisodeClick = { episodeId -> onNavigateToWatch(episodeId) }
                 )
-            }*/
+            }
         }
     }
 

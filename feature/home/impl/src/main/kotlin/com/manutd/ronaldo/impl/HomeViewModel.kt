@@ -115,12 +115,3 @@ data class MoviesState(
 
 }
 
-@Module
-@InstallIn(MavericksViewModelComponent::class) // 1. Cài đặt vào Component riêng của Mavericks
-interface HomeViewModelModule {
-
-    @Binds
-    @IntoMap // 2. Đưa vào Map (để sửa cái lỗi MissingBinding Map kia)
-    @ViewModelKey(HomeViewModel::class) // 3. Định danh Key là class ViewModel của bạn
-    fun bindHomeViewModelFactory(factory: HomeViewModel.Factory): AssistedViewModelFactory<*, *>
-}

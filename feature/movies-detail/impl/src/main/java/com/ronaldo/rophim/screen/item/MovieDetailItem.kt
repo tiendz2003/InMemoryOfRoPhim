@@ -39,7 +39,7 @@ import com.ronaldo.rophim.screen.TextPrimary
 import com.ronaldo.rophim.screen.TextSecondary
 
 @Composable
-private fun RecommendItem(item: MovieRecommendation, modifier: Modifier = Modifier) {
+ fun RecommendItem(item: MovieRecommendation, modifier: Modifier = Modifier) {
     Column(
         modifier = modifier.clickable { /* TODO: navigate to detail */ },
         verticalArrangement = Arrangement.spacedBy(6.dp)
@@ -86,7 +86,7 @@ private fun RecommendItem(item: MovieRecommendation, modifier: Modifier = Modifi
 }
 
 @Composable
-private fun EpisodeItem(
+ fun EpisodeItem(
     episode: Episode,
     modifier: Modifier = Modifier,
     onClick: () -> Unit

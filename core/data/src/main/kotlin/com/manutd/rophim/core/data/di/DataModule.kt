@@ -2,6 +2,8 @@ package com.manutd.rophim.core.data.di
 
 import com.manutd.rophim.core.data.repository.HomeResourceRepository
 import com.manutd.rophim.core.data.repository.HomeResourceRepositoryImpl
+import com.manutd.rophim.core.data.repository.MovieDetailRepository
+import com.manutd.rophim.core.data.repository.MovieDetailRepositoryImpl
 import com.manutd.rophim.core.data.utils.ConnectivityManagerNetworkMonitor
 import com.manutd.rophim.core.data.utils.NetworkMonitor
 import dagger.Binds
@@ -22,4 +24,9 @@ abstract class DataModule {
     internal abstract fun bindsHomeResourceRepository(
         homeResourceRepository: HomeResourceRepositoryImpl,
     ): HomeResourceRepository
+
+    @Binds
+    internal abstract fun bindsMovieDetailRepository(
+        movieDetailRepositoryImpl: MovieDetailRepositoryImpl,
+    ): MovieDetailRepository
 }

@@ -26,6 +26,8 @@ import androidx.compose.material3.adaptive.ExperimentalMaterial3AdaptiveApi
 import androidx.compose.material3.adaptive.WindowAdaptiveInfo
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.material3.adaptive.navigation3.rememberListDetailSceneStrategy
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffoldDefaults
+import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteType
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -60,7 +62,6 @@ fun RoApp(
 
     RoBackground(modifier = modifier) {
         val snackbarHostState = remember { SnackbarHostState() }
-
         val isOffline by appState.isOffline.collectAsStateWithLifecycle()
 
         // If user is not connected to the internet show a snack bar to inform them.
@@ -98,10 +99,18 @@ internal fun ROApp(
     modifier: Modifier = Modifier,
     windowAdaptiveInfo: WindowAdaptiveInfo = currentWindowAdaptiveInfo(),
 ) {
+
     val snackbarHostState = LocalSnackbarHostState.current
+    val shouldShowBottomBar =
+        appState.navigationState.currentKey in appState.navigationState.topLevelKeys
 
     val navigator = remember { Navigator(appState.navigationState) }
     RoNavigationSuiteScaffold(
+        layoutType = if (shouldShowBottomBar) {
+            NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(windowAdaptiveInfo)
+        } else {
+            NavigationSuiteType.None // Tàng hình Bottom Nav!
+        },
         navigationSuiteItems = {
             TOP_LEVEL_NAV_ITEMS.forEach { (navKey, navItem) ->
                 // check if has any message
@@ -126,7 +135,6 @@ internal fun ROApp(
                 )
             }
         },
-        windowAdaptiveInfo = windowAdaptiveInfo,
     ) {
         Scaffold(
             modifier = modifier.semantics {
@@ -157,6 +165,7 @@ internal fun ROApp(
                         ),
                     ),
             ) {
+
                 Box(
                     modifier = Modifier
                         .systemBarsPadding()

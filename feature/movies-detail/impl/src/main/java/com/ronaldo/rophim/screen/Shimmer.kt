@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import com.manutd.ronaldo.designsystem.component.ShimmerBox
 
 @Composable
-private fun RecommendShimmer() {
+fun RecommendShimmer() {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         repeat(2) {
             Row(
@@ -49,23 +49,29 @@ private fun RecommendShimmer() {
 }
 
 @Composable
-private fun CastShimmer() {
+fun CastShimmer() {
     Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
         repeat(5) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                ShimmerBox(modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape))
+                ShimmerBox(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                )
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    ShimmerBox(modifier = Modifier
-                        .width(120.dp)
-                        .height(14.dp))
-                    ShimmerBox(modifier = Modifier
-                        .width(80.dp)
-                        .height(12.dp))
+                    ShimmerBox(
+                        modifier = Modifier
+                            .width(120.dp)
+                            .height(14.dp)
+                    )
+                    ShimmerBox(
+                        modifier = Modifier
+                            .width(80.dp)
+                            .height(12.dp)
+                    )
                 }
             }
         }
@@ -73,11 +79,13 @@ private fun CastShimmer() {
 }
 
 @Composable
-private fun MovieInfoShimmer() {
+fun MovieInfoShimmer() {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        ShimmerBox(modifier = Modifier
-            .fillMaxWidth(0.75f)
-            .height(24.dp))
+        ShimmerBox(
+            modifier = Modifier
+                .fillMaxWidth(0.75f)
+                .height(24.dp)
+        )
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             repeat(4) {
                 ShimmerBox(
@@ -89,12 +97,18 @@ private fun MovieInfoShimmer() {
             }
         }
         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            repeat(3) { ShimmerBox(modifier = Modifier
-                .width(60.dp)
-                .height(16.dp)) }
+            repeat(3) {
+                ShimmerBox(
+                    modifier = Modifier
+                        .width(60.dp)
+                        .height(16.dp)
+                )
+            }
         }
-        ShimmerBox(modifier = Modifier
-            .fillMaxWidth()
-            .height(60.dp))
+        ShimmerBox(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(60.dp)
+        )
     }
 }

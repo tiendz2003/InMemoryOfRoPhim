@@ -22,6 +22,7 @@ import com.manutd.ronaldo.network.model.CastMember
 import com.manutd.ronaldo.network.model.MovieDetail
 import com.manutd.ronaldo.network.model.MovieRecommendation
 import com.manutd.ronaldo.network.model.MovieType
+import com.manutd.ronaldo.network.model.RatingSource
 import com.manutd.rophim.ExoPlayerManager
 import com.ronaldo.rophim.api.MoviesDetailKey
 import dagger.Binds
@@ -238,6 +239,20 @@ data class DetailState(
             season.audioTracks.firstOrNull { it.id == trackId }
                 ?: season.audioTracks.firstOrNull()
         }
+    val metadataBadges: List<MetadataBadge>
+        get() {
+            val detail = movieDetail ?: return emptyList()
+            return buildList {
+                // IMDb badge
+                detail.ratings.firstOrNull { it.source == RatingSource.IMDB }?.let {
+                    add(MetadataBadge.Rating("IMDb", it.score))
+                }
+                add(MetadataBadge.Text(detail.classification))
+                add(MetadataBadge.Text(detail.releaseYear.toString()))
+                detail.currentSeason?.let { add(MetadataBadge.Text("Phần $it")) }
+                detail.latestEpisode?.let { add(MetadataBadge.Text("Tập $it")) }
+            }
+        }
 }
 
 sealed class TrailerUiState {
@@ -267,14 +282,4 @@ sealed class DetailTab {
 sealed class MetadataBadge {
     data class Rating(val label: String, val score: Float) : MetadataBadge()
     data class Text(val value: String) : MetadataBadge()
-}
-
-@Module
-@InstallIn(MavericksViewModelComponent::class) // 1. Cài đặt vào Component riêng của Mavericks
-interface DetailViewModelModule {
-
-    @Binds
-    @IntoMap // 2. Đưa vào Map (để sửa cái lỗi MissingBinding Map kia)
-    @ViewModelKey(MoviesDetailViewModel::class) // 3. Định danh Key là class ViewModel của bạn
-    fun bindHomeViewModelFactory(factory: MoviesDetailViewModel.Factory): AssistedViewModelFactory<*, *>
 }
