@@ -1,11 +1,23 @@
 package com.manutd.rophim.core.data.utils
 
 import com.manutd.ronaldo.network.model.Actor
+import com.manutd.ronaldo.network.model.AiringStatus
+import com.manutd.ronaldo.network.model.AudioTrack
+import com.manutd.ronaldo.network.model.CastMember
+import com.manutd.ronaldo.network.model.CastRole
 import com.manutd.ronaldo.network.model.Channel
 import com.manutd.ronaldo.network.model.ChannelType
+import com.manutd.ronaldo.network.model.Episode
 import com.manutd.ronaldo.network.model.Gender
+import com.manutd.ronaldo.network.model.Genre
 import com.manutd.ronaldo.network.model.Group
 import com.manutd.ronaldo.network.model.HomeData
+import com.manutd.ronaldo.network.model.MovieDetail
+import com.manutd.ronaldo.network.model.MovieRating
+import com.manutd.ronaldo.network.model.MovieRecommendation
+import com.manutd.ronaldo.network.model.MovieType
+import com.manutd.ronaldo.network.model.RatingSource
+import com.manutd.ronaldo.network.model.Season
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
 import kotlinx.collections.immutable.toImmutableList
@@ -888,4 +900,200 @@ object FakeDataProvider {
             )
         )
     }
+
+    //-------------DỮ LIỆU CHI TIẾT---------------
+    private val vietsub = AudioTrack("at_1", "Vietsub #1", "vi")
+    private val thuyet_minh = AudioTrack("at_2", "Thuyết minh", "vi")
+    private val tieng_goc = AudioTrack("at_3", "Tiếng gốc", "ko")
+
+    private fun fakeEpisodes(count: Int): List<Episode> =
+        (1..count).map { i ->
+            Episode(
+                id = "ep_$i",
+                episodeNumber = i,
+                title = "Tập $i",
+                thumbnailUrl = "https://picsum.photos/seed/ep$i/320/180",
+                duration = 2700 + (i * 30),
+                videoUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+                isWatched = i <= 5,
+                watchProgress = if (i == 6) 0.4f else if (i <= 5) 1f else 0f
+            )
+        }
+
+    // ── Phim bộ đang chiếu ────────────────────────────────────────
+    val seriesOnAir = MovieDetail(
+        id = "mv_001",
+        title = "Điều Tra Viên Hong",
+        originalTitle = "홍형사",
+        posterUrl = "https://picsum.photos/seed/hong/720/405",
+        trailerUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+        ratings = listOf(MovieRating(RatingSource.IMDB, 7.2f)),
+        classification = "T16",
+        releaseYear = 2026,
+        type = MovieType.SERIES,
+        currentSeason = 1,
+        totalSeasons = 1,
+        latestEpisode = 14,
+        airingStatus = AiringStatus.OnAir(currentEpisode = 14, totalEpisode = 16),
+        genres = listOf(
+            Genre("g1", "Hài Hước"),
+            Genre("g2", "Hình Sự")
+        ),
+        synopsis = "Bộ phim hài văn phòng mang phong cách retro, miêu tả những sự kiện hỗn loạn diễn ra vào cuối những năm 1990 khi Sammo Hung, một giám sát viên khắc nghiệt được điều chuyển đến đồn cảnh sát tỉnh lẻ. Cuộc chạm mặt giữa phong cách làm việc cũ kỹ và thế hệ trẻ hiện đại tạo nên vô số tình huống dở khóc dở cười.",
+        seasons = listOf(
+            Season(
+                seasonNumber = 1,
+                title = "Phần 1",
+                episodes = fakeEpisodes(16),
+                audioTracks = listOf(vietsub, thuyet_minh, tieng_goc),
+                defaultAudioTrackId = vietsub.id
+            )
+        )
+    )
+
+    // ── Phim bộ đã hoàn thành ─────────────────────────────────────
+    val seriesCompleted = MovieDetail(
+        id = "mv_002",
+        title = "Tiếng Yêu Này, Anh Dịch Được Không?",
+        originalTitle = "사랑의 언어",
+        posterUrl = "https://picsum.photos/seed/love/720/405",
+        trailerUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+        ratings = listOf(MovieRating(RatingSource.IMDB, 8.0f)),
+        classification = "T13",
+        releaseYear = 2026,
+        type = MovieType.SERIES,
+        currentSeason = 1,
+        totalSeasons = 1,
+        latestEpisode = 12,
+        airingStatus = AiringStatus.Completed,
+        genres = listOf(
+            Genre("g3", "Hài"),
+            Genre("g4", "Chính Kịch"),
+            Genre("g5", "Lãng Mạn"),
+            Genre("g6", "Tình Cảm"),
+            Genre("g7", "Tâm Lý")
+        ),
+        synopsis = "Đi khắp thế giới để quay chương trình truyền hình, cảm xúc của một người nổi tiếng và phiên dịch viên của cô lại chẳng thể nào thông dịch. Liệu tình yêu có tìm được ngôn ngữ chung khi hai tâm hồn hoàn toàn khác biệt cùng chia sẻ những chuyến đi vòng quanh thế giới?",
+        seasons = listOf(
+            Season(
+                seasonNumber = 1,
+                title = "Phần 1",
+                episodes = fakeEpisodes(12),
+                audioTracks = listOf(vietsub, tieng_goc),
+                defaultAudioTrackId = vietsub.id
+            )
+        )
+    )
+
+    // ── Phim lẻ chiếu rạp ─────────────────────────────────────────
+    val singleMovie = MovieDetail(
+        id = "mv_003",
+        title = "Thanh Gươm Diệt Quỷ: Quyết Chiến",
+        originalTitle = "鬼滅の刃",
+        posterUrl = "https://picsum.photos/seed/kimetsu/720/405",
+        trailerUrl = "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/SubaruOutbackOnStreetAndDirt.mp4",
+        ratings = listOf(
+            MovieRating(RatingSource.IMDB, 8.7f),
+            MovieRating(RatingSource.TMDB, 8.9f)
+        ),
+        classification = "T13",
+        releaseYear = 2026,
+        type = MovieType.MOVIE,   // ← Phim lẻ: không có episodes tab
+        airingStatus = AiringStatus.NotApplicable,
+        genres = listOf(
+            Genre("g8", "Hành Động"),
+            Genre("g9", "Phiêu Lưu"),
+            Genre("g10", "Hoạt Hình")
+        ),
+        synopsis = "Tiếp nối hành trình của Tanjiro và đồng đội, trận chiến sinh tử với Thượng Huyền Nhất Kokushibo cuối cùng cũng đến hồi kết. Số phận của toàn bộ Đội Diệt Quỷ và nhân loại sẽ được quyết định trong một đêm duy nhất."
+        // seasons = emptyList() — không có tập phim
+    )
+
+    val fakeCast = listOf(
+        CastMember(
+            "c1",
+            "Lee Jung-jae",
+            "Seong Gi-hun",
+            "https://picsum.photos/seed/c1/200/200",
+            CastRole.MAIN
+        ),
+        CastMember(
+            "c2",
+            "Park Hae-soo",
+            "Cho Sang-woo",
+            "https://picsum.photos/seed/c2/200/200",
+            CastRole.MAIN
+        ),
+        CastMember(
+            "c3",
+            "Jung Ho-yeon",
+            "Kang Sae-byeok",
+            "https://picsum.photos/seed/c3/200/200",
+            CastRole.MAIN
+        ),
+        CastMember(
+            "c4",
+            "O Yeong-su",
+            "Oh Il-nam",
+            "https://picsum.photos/seed/c4/200/200",
+            CastRole.SUPPORTING
+        ),
+        CastMember(
+            "c5",
+            "Heo Sung-tae",
+            "Jang Deok-su",
+            "https://picsum.photos/seed/c5/200/200",
+            CastRole.SUPPORTING
+        ),
+        CastMember(
+            "c6",
+            "Kim Joo-ryoung",
+            "Han Mi-nyeo",
+            "https://picsum.photos/seed/c6/200/200",
+            CastRole.SUPPORTING
+        ),
+    )
+
+    val fakeRecommendations = listOf(
+        MovieRecommendation(
+            "r1",
+            "Squid Game",
+            "https://picsum.photos/seed/r1/320/180",
+            8.0f,
+            MovieType.SERIES,
+            listOf(Genre("g11", "Thriller"))
+        ),
+        MovieRecommendation(
+            "r2",
+            "Crash Landing on You",
+            "https://picsum.photos/seed/r2/320/180",
+            8.7f,
+            MovieType.SERIES,
+            listOf(Genre("g5", "Lãng Mạn"))
+        ),
+        MovieRecommendation(
+            "r3",
+            "My Mister",
+            "https://picsum.photos/seed/r3/320/180",
+            9.0f,
+            MovieType.SERIES,
+            listOf(Genre("g4", "Chính Kịch"))
+        ),
+        MovieRecommendation(
+            "r4",
+            "Parasite",
+            "https://picsum.photos/seed/r4/320/180",
+            8.6f,
+            MovieType.MOVIE,
+            listOf(Genre("g12", "Kinh Dị"))
+        ),
+        MovieRecommendation(
+            "r5",
+            "Itaewon Class",
+            "https://picsum.photos/seed/r5/320/180",
+            8.1f,
+            MovieType.SERIES,
+            listOf(Genre("g13", "Khởi Nghiệp"))
+        ),
+    )
 }
