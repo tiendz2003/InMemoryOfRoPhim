@@ -1,6 +1,12 @@
 package rophim.ui
 
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutLinearInEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
@@ -44,6 +50,8 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.ui.NavDisplay
 import com.manutd.ronaldo.designsystem.component.RoBackground
+import com.manutd.ronaldo.designsystem.component.RoNavigationBar
+import com.manutd.ronaldo.designsystem.component.RoNavigationBarItem
 import com.manutd.ronaldo.designsystem.component.RoNavigationSuiteScaffold
 import com.manutd.ronaldo.designsystem.theme.LightAndroidBackgroundTheme
 import com.manutd.ronaldo.impl.navigation.homeEntry
@@ -75,7 +83,7 @@ fun RoApp(
             }
         }
         CompositionLocalProvider(LocalSnackbarHostState provides snackbarHostState) {
-            ROApp(
+            RoPhimApp(
                 appState = appState,
                 modifier = modifier,
                 windowAdaptiveInfo = windowAdaptiveInfo,
@@ -88,35 +96,105 @@ val LocalSnackbarHostState = compositionLocalOf<SnackbarHostState> {
     error("SnackbarHostState state should be initialized at runtime")
 }
 
-@Composable
 @OptIn(
     ExperimentalMaterial3Api::class,
     ExperimentalComposeUiApi::class,
     ExperimentalMaterial3AdaptiveApi::class,
 )
-internal fun ROApp(
+@Composable
+internal fun RoPhimApp(
     appState: RoAppState,
     modifier: Modifier = Modifier,
+    // windowAdaptiveInfo tạm thời không dùng cho Scaffold thuần, nhưng có thể giữ lại cho tương lai
     windowAdaptiveInfo: WindowAdaptiveInfo = currentWindowAdaptiveInfo(),
 ) {
-
     val snackbarHostState = LocalSnackbarHostState.current
     val shouldShowBottomBar =
         appState.navigationState.currentKey in appState.navigationState.topLevelKeys
 
     val navigator = remember { Navigator(appState.navigationState) }
-    RoNavigationSuiteScaffold(
-        layoutType = if (shouldShowBottomBar) {
-            NavigationSuiteScaffoldDefaults.calculateFromAdaptiveInfo(windowAdaptiveInfo)
-        } else {
-            NavigationSuiteType.None // Tàng hình Bottom Nav!
+
+    // Dùng 1 Scaffold duy nhất làm Root cho toàn bộ App
+    Scaffold(
+        modifier = modifier.semantics {
+            testTagsAsResourceId = true
         },
-        navigationSuiteItems = {
+        containerColor = LightAndroidBackgroundTheme.color,
+        contentColor = MaterialTheme.colorScheme.onBackground,
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
+        snackbarHost = {
+            SnackbarHost(
+                snackbarHostState,
+                modifier = Modifier.windowInsetsPadding(
+                    WindowInsets.safeDrawing.exclude(WindowInsets.ime),
+                ),
+            )
+        },
+        // Gắn BottomBar vào đây
+        bottomBar = {
+            RoBottomBar(
+                appState = appState,
+                navigator = navigator,
+                shouldShowBottomBar = shouldShowBottomBar
+            )
+        }
+    ) { padding ->
+        Column(
+            Modifier
+                .fillMaxSize()
+                .padding(padding) // Áp dụng padding động
+                .consumeWindowInsets(padding)
+                .windowInsetsPadding(
+                    WindowInsets.safeDrawing.only(WindowInsetsSides.Horizontal),
+                ),
+        ) {
+            Box(
+                modifier = Modifier
+                    .systemBarsPadding()
+                    .consumeWindowInsets(
+                        WindowInsets.safeDrawing.only(WindowInsetsSides.Top)
+                    ),
+            ) {
+                val listDetailStrategy = rememberListDetailSceneStrategy<NavKey>()
+
+                val entryProvider = entryProvider {
+                    homeEntry(navigator)
+                    moviesDetailEntry(navigator)
+                }
+
+                NavDisplay(
+                    entries = appState.navigationState.toEntries(entryProvider),
+                    sceneStrategy = listDetailStrategy,
+                    onBack = { navigator.goBack() },
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun RoBottomBar(
+    appState: RoAppState,
+    navigator: Navigator,
+    shouldShowBottomBar: Boolean
+) {
+    AnimatedVisibility(
+        visible = shouldShowBottomBar,
+        // Trượt từ dưới lên mượt mà (YouTube style)
+        enter = slideInVertically(
+            animationSpec = tween(durationMillis = 500, easing = LinearOutSlowInEasing),
+            initialOffsetY = { fullHeight -> fullHeight }
+        ),
+        // Trượt tuột xuống dưới giấu đi
+        exit = slideOutVertically(
+            animationSpec = tween(durationMillis = 500, easing = FastOutLinearInEasing),
+            targetOffsetY = { fullHeight -> fullHeight }
+        )
+    ) {
+        RoNavigationBar {
             TOP_LEVEL_NAV_ITEMS.forEach { (navKey, navItem) ->
-                // check if has any message
-                // val hasUnread = unreadNavKeys.contains(navKey)
                 val selected = navKey == appState.navigationState.currentTopLevelKey
-                item(
+                RoNavigationBarItem(
                     selected = selected,
                     onClick = { navigator.navigate(navKey) },
                     icon = {
@@ -131,67 +209,10 @@ internal fun ROApp(
                             contentDescription = null,
                         )
                     },
-                    label = { Text(stringResource(navItem.iconTextId)) },
+                    label = { Text(stringResource(navItem.iconTextId)) }
                 )
-            }
-        },
-    ) {
-        Scaffold(
-            modifier = modifier.semantics {
-                testTagsAsResourceId = true
-            },
-            containerColor = LightAndroidBackgroundTheme.color,
-            contentColor = MaterialTheme.colorScheme.onBackground,
-            contentWindowInsets = WindowInsets(0, 0, 0, 0),
-            snackbarHost = {
-                SnackbarHost(
-                    snackbarHostState,
-                    modifier = Modifier.windowInsetsPadding(
-                        WindowInsets.safeDrawing.exclude(
-                            WindowInsets.ime,
-                        ),
-                    ),
-                )
-            },
-        ) { padding ->
-            Column(
-                Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-                    .consumeWindowInsets(padding)
-                    .windowInsetsPadding(
-                        WindowInsets.safeDrawing.only(
-                            WindowInsetsSides.Horizontal,
-                        ),
-                    ),
-            ) {
-
-                Box(
-                    modifier = Modifier
-                        .systemBarsPadding()
-                        .consumeWindowInsets(
-                            WindowInsets.safeDrawing.only(WindowInsetsSides.Top)
-                        ),
-                ) {
-                    val listDetailStrategy = rememberListDetailSceneStrategy<NavKey>()
-
-                    val entryProvider = entryProvider {
-                        homeEntry(navigator)
-                        moviesDetailEntry(navigator)
-                    }
-
-                    NavDisplay(
-                        entries = appState.navigationState.toEntries(entryProvider),
-                        sceneStrategy = listDetailStrategy,
-                        onBack = { navigator.goBack() },
-                    )
-                }
-
-                // TODO: We may want to add padding or spacer when the snackbar is shown so that
-                //  content doesn't display behind it.
             }
         }
     }
 }
-
 

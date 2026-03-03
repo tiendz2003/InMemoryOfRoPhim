@@ -1,8 +1,6 @@
 package com.manutd.ronaldo.impl.screen
 
 
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.withStyle
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
@@ -48,8 +46,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -57,7 +53,7 @@ import androidx.compose.ui.util.lerp
 import androidx.compose.ui.zIndex
 import coil3.compose.AsyncImage
 import com.manutd.ronaldo.designsystem.component.RoButton
-import com.manutd.ronaldo.designsystem.component.Tag
+import com.manutd.ronaldo.designsystem.component.RoTag
 import com.manutd.ronaldo.designsystem.component.TagType
 import com.manutd.ronaldo.designsystem.theme.GoldGradient
 import com.manutd.ronaldo.designsystem.theme.RoTheme
@@ -391,11 +387,11 @@ private fun MovieTags(
         modifier = modifier,
         horizontalArrangement = Arrangement.spacedBy(6.dp)
     ) {
-        channel.imdb?.let { Tag(text = it, type = TagType.IMDB) }
-        channel.quality?.let { Tag(text = it, type = TagType.QUALITY) }
-        channel.rating?.let { Tag(text = it, type = TagType.SOLID) }
-        channel.year?.let { Tag(text = it, type = TagType.OUTLINE) }
-        channel.episode?.let { Tag(text = it, type = TagType.OUTLINE) }
+        channel.imdb?.let { RoTag(text = it, type = TagType.IMDB) }
+        channel.quality?.let { RoTag(text = it, type = TagType.QUALITY) }
+        channel.rating?.let { RoTag(text = it, type = TagType.SOLID) }
+        channel.year?.let { RoTag(text = it, type = TagType.OUTLINE) }
+        channel.episode?.let { RoTag(text = it, type = TagType.OUTLINE) }
     }
 }
 

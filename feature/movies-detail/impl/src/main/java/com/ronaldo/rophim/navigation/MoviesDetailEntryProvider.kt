@@ -14,7 +14,7 @@ fun EntryProviderScope<NavKey>.moviesDetailEntry(navigator: Navigator) {
             onNavigateBack = {},
             onNavigateToWatch = {},
             viewModel = mavericksViewModel(
-                argsFactory = { MoviesDetailKey(movieId = key.movieId) }
+                argsFactory = { key.movieId }
             )
         )
     }

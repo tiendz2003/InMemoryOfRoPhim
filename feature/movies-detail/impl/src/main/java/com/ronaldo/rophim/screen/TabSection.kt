@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -13,26 +14,21 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.List
 import androidx.compose.material.icons.automirrored.rounded.VolumeUp
 import androidx.compose.material.icons.rounded.ArrowDropDown
 import androidx.compose.material.icons.rounded.Check
-import androidx.compose.material.icons.rounded.List
-import androidx.compose.material.icons.rounded.VolumeUp
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuDefaults
 import androidx.compose.material3.SecondaryTabRow
 import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
-import androidx.compose.material3.TabRowDefaults
-import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -47,10 +43,19 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.airbnb.mvrx.Async
+import com.airbnb.mvrx.Fail
+import com.airbnb.mvrx.Loading
+import com.airbnb.mvrx.Success
+import com.airbnb.mvrx.Uninitialized
 import com.manutd.ronaldo.designsystem.theme.RoTheme
 import com.manutd.ronaldo.network.model.AudioTrack
+import com.manutd.ronaldo.network.model.CastMember
+import com.manutd.ronaldo.network.model.MovieRecommendation
 import com.manutd.ronaldo.network.model.Season
+import com.ronaldo.rophim.screen.item.CastMemberItem
 import com.ronaldo.rophim.screen.item.EpisodeItem
+import com.ronaldo.rophim.screen.item.RecommendItem
 import kotlin.collections.first
 import kotlin.collections.forEachIndexed
 
@@ -86,22 +91,17 @@ fun TabSection(
         HorizontalDivider(color = Color.White.copy(alpha = 0.08f))
         SecondaryTabRow(
             modifier = Modifier
-                .wrapContentWidth()
-            ,
+                .fillMaxWidth(0.7f)
+                .align(Alignment.Start),
             selectedTabIndex = state.selectedTabIndex,
             containerColor = Color.Transparent,
             contentColor = AppYellow,
             // Sử dụng TabIndicatorScope mới, code ngắn gọn và dễ hiểu hơn
             indicator = {
-                Box(modifier = Modifier.fillMaxSize()) {
-
-                    // Vẽ thanh Divider xám nhạt đè sát mép TRÊN CÙNG (TopCenter)
-                    HorizontalDivider(
-                        modifier = Modifier.align(Alignment.TopCenter),
-                        thickness = 1.dp,
-                        color = Color.White.copy(alpha = 0.08f)
-                    )
-
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                ) {
                     // Vẽ thanh Indicator màu vàng trượt qua lại
                     Box(
                         modifier = Modifier
@@ -114,9 +114,12 @@ fun TabSection(
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(2.dp)
+                                .padding(horizontal = 8.dp)
+                                .height(1.dp)
                                 .background(AppYellow)
-                                .align(Alignment.TopCenter) // Đẩy sát mép TRÊN CÙNG
+
+                                .align(Alignment.TopCenter)
+
                         )
                     }
                 }
@@ -133,7 +136,8 @@ fun TabSection(
                             text = tab.title,
                             fontWeight = if (state.selectedTabIndex == index)
                                 FontWeight.Bold else FontWeight.Normal,
-                            fontSize = 14.sp
+                            fontSize = 12.sp,
+                            style = MaterialTheme.typography.bodySmall
                         )
                     },
                     selectedContentColor = AppYellow,
@@ -155,11 +159,11 @@ fun TabSection(
                 )
 
                 is DetailTab.Cast -> {
-                    //CastTabContent(castAsync = state.castAsync)
+                    CastTabContent(castAsync = state.castAsync)
                 }
 
                 is DetailTab.Recommendations -> {
-                    //RecommendTabContent(recommendAsync = state.recommendAsync)
+                    RecommendTabContent(recommendAsync = state.recommendAsync)
                 }
 
                 null -> Unit
@@ -261,8 +265,8 @@ private fun SeasonDropdown(
         Row(
             modifier = Modifier
                 .menuAnchor()
-                .background(SurfaceDark, RoundedCornerShape(6.dp))
-                .padding(horizontal = 10.dp, vertical = 6.dp),
+                .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(6.dp))
+                .padding(horizontal = 8.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
@@ -307,7 +311,7 @@ private fun AudioTrackDropdown(
         Row(
             modifier = Modifier
                 .menuAnchor()
-                .background(SurfaceDark, RoundedCornerShape(6.dp))
+                .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(6.dp))
                 .padding(horizontal = 10.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(4.dp)
@@ -329,7 +333,7 @@ private fun AudioTrackDropdown(
         ExposedDropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false },
-            containerColor = SurfaceDark
+            containerColor = MaterialTheme.colorScheme.primaryContainer
         ) {
             tracks.forEach { track ->
                 DropdownMenuItem(
@@ -349,6 +353,63 @@ private fun AudioTrackDropdown(
                     },
                     onClick = { onTrackSelected(track.id); expanded = false }
                 )
+            }
+        }
+    }
+}
+
+@Composable
+private fun CastTabContent(castAsync: Async<List<CastMember>>) {
+    Column(modifier = Modifier.padding(16.dp)) {
+        when (castAsync) {
+            is Uninitialized, is Loading -> CastShimmer()
+            is Fail -> ErrorInline(message = "Không tải được danh sách diễn viên")
+            is Success -> {
+                val cast = castAsync()
+                cast.forEach { member ->
+                    CastMemberItem(
+                        member = member,
+                        onClick = { /* TODO: navigate to detail */ }
+                    )
+                    HorizontalDivider(
+                        modifier = Modifier.padding(vertical = 8.dp),
+                        color = Color.White.copy(alpha = 0.05f)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun RecommendTabContent(
+    recommendAsync: Async<List<MovieRecommendation>>
+) {
+    Column(modifier = Modifier.padding(horizontal = 12.dp, vertical = 12.dp)) {
+        when (recommendAsync) {
+            is Uninitialized, is Loading -> RecommendShimmer()
+            is Fail -> ErrorInline(message = "Không tải được đề xuất")
+            is Success -> {
+                val items = recommendAsync()
+                FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp), // Cột cách nhau 10.dp
+                    verticalArrangement = Arrangement.spacedBy(10.dp),   // Hàng cách nhau 10.dp
+                    maxItemsInEachRow = 3 // Khóa cứng tối đa 2 cột trên điện thoại
+                ) {
+                    items.forEach { rec ->
+                        RecommendItem(
+                            item = rec,
+                            modifier = Modifier.weight(1f) // Tự động chia đều 50% chiều rộng mỗi item
+                        )
+                    }
+
+                    val emptySpots = (3 - (items.size % 3)) % 3
+                    repeat(emptySpots) {
+                        Spacer(modifier = Modifier.weight(1f))
+                    }
+                }
             }
         }
     }

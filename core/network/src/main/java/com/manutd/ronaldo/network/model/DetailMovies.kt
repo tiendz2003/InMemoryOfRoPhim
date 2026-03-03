@@ -1,9 +1,15 @@
 package com.manutd.ronaldo.network.model
 
+import javax.annotation.concurrent.Immutable
+
 enum class MovieType { SERIES, MOVIE }
 
 enum class RatingSource { IMDB, TMDB }
-enum class CastRole { MAIN, SUPPORTING, GUEST }
+enum class CastRole(
+    val label: String
+) { MAIN("Diễn viên chính"), SUPPORTING("Diễn viên phụ"), GUEST("Cameo") }
+
+@Immutable
 sealed class AiringStatus {
     data class OnAir(val currentEpisode: Int, val totalEpisode: Int) : AiringStatus()
     object Completed : AiringStatus()
@@ -57,6 +63,8 @@ data class MovieRecommendation(
     val title: String,
     val posterUrl: String,
     val rating: Float,
+    val episode: String,
+    val quality: String,
     val type: MovieType,
     val genres: List<Genre>
 )

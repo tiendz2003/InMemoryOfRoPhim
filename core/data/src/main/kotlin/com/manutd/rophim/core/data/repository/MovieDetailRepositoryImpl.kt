@@ -19,7 +19,7 @@ class MovieDetailRepositoryImpl @Inject constructor() : MovieDetailRepository {
             "mv_001" -> FakeDataProvider.seriesOnAir
             "mv_002" -> FakeDataProvider.seriesCompleted
             "mv_003" -> FakeDataProvider.singleMovie
-            else -> FakeDataProvider.seriesOnAir  // fallback
+            else -> FakeDataProvider.seriesOnAir
         }
     }
 

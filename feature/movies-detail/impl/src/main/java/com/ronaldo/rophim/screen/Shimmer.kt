@@ -20,12 +20,12 @@ import com.manutd.ronaldo.designsystem.component.ShimmerBox
 @Composable
 fun RecommendShimmer() {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        repeat(2) {
+        repeat(3) {
             Row(
                 horizontalArrangement = Arrangement.spacedBy(10.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                repeat(2) {
+                repeat(3) {
                     Column(
                         modifier = Modifier.weight(1f),
                         verticalArrangement = Arrangement.spacedBy(6.dp)
@@ -33,7 +33,7 @@ fun RecommendShimmer() {
                         ShimmerBox(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .aspectRatio(16f / 9f)
+                                .aspectRatio(9f / 16f)
                                 .clip(RoundedCornerShape(8.dp))
                         )
                         ShimmerBox(

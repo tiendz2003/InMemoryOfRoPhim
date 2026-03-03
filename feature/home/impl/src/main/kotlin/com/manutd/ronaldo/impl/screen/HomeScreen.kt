@@ -99,14 +99,21 @@ fun HomeScreen(
             modifier = Modifier.fillMaxSize()
         ) {
             val sections = state.sections.invoke()
-
+            val listId = listOf(
+                "mv_001",
+                "mv_002",
+                "mv_003"
+            )
+            val randomId = listId.random()
             if (!sections.isNullOrEmpty()) {
                 HomeContent(
                     sections = sections.toImmutableList(),
                     listState = listState,
                     onChannelClick = { channel ->
+                        //todo:Truyền id thật hiện tại ta sẽ truyền id fake
+
                         viewModel.selectChannel(channel.id)
-                        onChannelClick(channel.id)
+                        onChannelClick(randomId)
                     },
                     contentPadding = PaddingValues(bottom = 40.dp)
                 )

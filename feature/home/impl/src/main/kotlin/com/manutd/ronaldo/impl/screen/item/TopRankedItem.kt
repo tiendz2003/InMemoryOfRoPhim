@@ -1,6 +1,5 @@
 package com.manutd.ronaldo.impl.screen.item
 
-import com.manutd.ronaldo.impl.utils.RoItemConstants
 
 
 import androidx.compose.foundation.BorderStroke
@@ -30,6 +29,7 @@ import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.manutd.ronaldo.designsystem.component.RoThumbnailImage
 import com.manutd.ronaldo.designsystem.theme.RoTheme
+import com.manutd.ronaldo.designsystem.utils.RoItemConstants
 import com.manutd.ronaldo.network.model.Channel
 
 @Preview

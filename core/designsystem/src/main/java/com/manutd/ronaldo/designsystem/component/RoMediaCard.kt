@@ -1,4 +1,4 @@
-package com.manutd.ronaldo.impl.screen.item
+package com.manutd.ronaldo.designsystem.component
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -21,46 +21,26 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil3.compose.AsyncImage
-import com.manutd.ronaldo.designsystem.component.RoThumbnailImage
-import com.manutd.ronaldo.impl.utils.BadgeType
-import com.manutd.ronaldo.impl.utils.MovieBadge
-import com.manutd.ronaldo.impl.utils.RoItemConstants
-import com.manutd.ronaldo.network.model.Channel
-import com.manutd.rophim.core.data.utils.FakeDataProvider
-import kotlinx.collections.immutable.ImmutableList
-import kotlinx.collections.immutable.persistentListOf
+import com.manutd.ronaldo.designsystem.utils.RoItemConstants
 
-@Preview
-@Composable
-fun HorizontalMovieItemPreview() {
-    val channel = FakeDataProvider.getHomeData().groups.first()
-        .channels.first()
-    HorizontalMovieItem(
-        channel = channel,
-        onClick = {},
-    )
-
-}
 
 @Composable
-fun HorizontalMovieItem(
-    channel: Channel,
+fun RoMediaCard(
+    title: String,
+    subtitle: String,
+    imageUrl: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    badges: ImmutableList<MovieBadge> = persistentListOf(),
+    // Thay vì nhận List<MovieBadge>, ta nhận List<Pair<String, Color>> hoặc một class UI Model đơn giản
+    badges: List<RoBadgeUiModel> = emptyList(),
 ) {
     Column(
         modifier = modifier
-            .width(RoItemConstants.HorizontalItemWidth)
-
     ) {
         val shape = RoundedCornerShape(RoItemConstants.HorizontalCornerRadius)
         Card(
@@ -73,28 +53,31 @@ fun HorizontalMovieItem(
                 .clickable(onClick = onClick)
         ) {
             Box {
-                // Thumbnail Image
                 RoThumbnailImage(
-                    model = channel.logoUrl,
-                    contentDescription = channel.name,
+                    model = imageUrl,
+                    contentDescription = title,
                     modifier = Modifier.fillMaxSize()
                 )
 
-                // Badges Row (Top Left)
                 if (badges.isNotEmpty()) {
-                    BadgesColumn(
-                        badges = badges,
+                    Column(
                         modifier = Modifier
                             .align(Alignment.BottomStart)
-                            .padding(6.dp)
-                    )
+                            .padding(6.dp),
+                        verticalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        badges.forEach { badge ->
+                            RoBadgeItem(text = badge.text, backgroundColor = badge.color)
+                        }
+                    }
                 }
             }
         }
+
         Spacer(modifier = Modifier.height(6.dp))
 
         Text(
-            text = channel.name,
+            text = title,
             style = MaterialTheme.typography.bodyMedium,
             fontWeight = FontWeight.Medium,
             color = Color.White,
@@ -104,7 +87,7 @@ fun HorizontalMovieItem(
             modifier = Modifier.fillMaxWidth()
         )
         Text(
-            text = channel.display,
+            text = subtitle,
             style = MaterialTheme.typography.bodySmall,
             color = Color.White,
             textAlign = TextAlign.Center,
@@ -115,33 +98,10 @@ fun HorizontalMovieItem(
     }
 }
 
-@Composable
-private fun BadgesColumn(
-    badges: ImmutableList<MovieBadge>,
-    modifier: Modifier = Modifier
-) {
-    Column(
-        modifier = modifier,
-        verticalArrangement = Arrangement.spacedBy(4.dp)
-    ) {
-        badges.forEach { badge ->
-            MovieBadgeItem(badge = badge)
-        }
-    }
-}
+data class RoBadgeUiModel(val text: String, val color: Color)
 
 @Composable
-private fun MovieBadgeItem(
-    badge: MovieBadge,
-    modifier: Modifier = Modifier
-) {
-    val backgroundColor = when (badge.type) {
-        BadgeType.AGE_RATING -> Color.Black.copy(alpha = 0.7f)
-        BadgeType.TIME_LIMIT -> Color(0xFF00BCD4).copy(alpha = 0.9f) // Cyan
-        BadgeType.QUALITY -> Color(0xFF4CAF50).copy(alpha = 0.9f) // Green
-        BadgeType.TRENDING -> Color(0xFFFF5722).copy(alpha = 0.9f) // Red
-    }
-
+private fun RoBadgeItem(text: String, backgroundColor: Color, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
             .background(
@@ -150,11 +110,6 @@ private fun MovieBadgeItem(
             )
             .padding(horizontal = 6.dp, vertical = 3.dp)
     ) {
-        Text(
-            text = badge.text,
-            color = Color.White,
-            fontSize = 10.sp,
-            fontWeight = FontWeight.Bold
-        )
+        Text(text = text, color = Color.White, fontSize = 10.sp, fontWeight = FontWeight.Bold)
     }
 }

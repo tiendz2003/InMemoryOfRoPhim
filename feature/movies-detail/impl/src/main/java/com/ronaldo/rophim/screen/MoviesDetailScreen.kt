@@ -65,12 +65,10 @@ val TextSecondary = Color(0xFFAAAAAA)
 val OrangeAiring = Color(0xFFFF8C00)
 
 
-
-
 @Preview(showBackground = true)
 @Composable
 fun MoviesDetailScreenPreview() {
-    RoTheme(){
+    RoTheme() {
         MoviesDetailScreen(
             onNavigateToWatch = {},
             onNavigateBack = {},
@@ -102,11 +100,12 @@ fun MoviesDetailScreen(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(DarkBg)
+            .background(MaterialTheme.colorScheme.onPrimary)
     ) {
         LazyColumn(
             state = listState,
             modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
             // Dùng WindowInsets để tự động cách Navigation Bar (tránh bị phím ảo che)
             contentPadding = PaddingValues(
                 bottom = WindowInsets.navigationBars.asPaddingValues()
@@ -121,6 +120,18 @@ fun MoviesDetailScreen(
                     onLoadTrailer = viewModel::loadTrailer,
                     onVisibilityChanged = viewModel::onTrailerVisibilityChanged,
                     onRetry = viewModel::retryTrailer,
+                )
+            }
+            item(key = "action_buttons") {
+                ActionButtonsSection(
+                    state = state,
+                    onWatchClick = { onNavigateToWatch(null) },
+                    onEpisodesClick = {
+                        // Scroll đến tab tập phim
+                        val episodesTabIndex = state.availableTabs
+                            .indexOfFirst { it is DetailTab.Episodes }
+                        if (episodesTabIndex >= 0) viewModel.onTabSelected(episodesTabIndex)
+                    }
                 )
             }
             // ── Item 2: Movie Info ──────────────────────────────

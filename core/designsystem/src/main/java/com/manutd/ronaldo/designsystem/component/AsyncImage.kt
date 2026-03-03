@@ -4,13 +4,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
+import com.manutd.rophim.core.designsystem.R
 
 @Composable
 fun RoThumbnailImage(
-    model: String,
+    model: String?,
     scale: ContentScale = ContentScale.Crop,
     contentDescription: String?,
     modifier: Modifier = Modifier
@@ -23,6 +25,8 @@ fun RoThumbnailImage(
             .build(),
         contentScale = scale,
         contentDescription = contentDescription,
+        placeholder = painterResource(id = R.drawable.ic_images),
+        error = painterResource(id = R.drawable.ic_image_error),
         modifier = modifier
 
     )

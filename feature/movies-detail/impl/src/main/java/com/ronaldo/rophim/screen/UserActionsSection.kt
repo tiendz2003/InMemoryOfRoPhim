@@ -78,10 +78,7 @@ fun UserActionsSection(
         )
 
     }
-    HorizontalDivider(
-        modifier = Modifier.padding(top = 16.dp),
-        color = Color.White.copy(alpha = 0.08f)
-    )
+
 }
 
 @Composable
@@ -127,6 +124,6 @@ private fun ActionIconButton(
                 }
             }
         }
-        Text(label, color = TextSecondary, fontSize = 12.sp)
+        Text(label, fontSize = 12.sp)
     }
 }

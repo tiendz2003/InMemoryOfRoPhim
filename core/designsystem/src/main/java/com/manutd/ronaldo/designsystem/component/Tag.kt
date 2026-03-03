@@ -16,10 +16,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 
-enum class TagType { IMDB, QUALITY, SOLID, OUTLINE }
+enum class TagType { IMDB, QUALITY, SOLID, OUTLINE,GENRE }
 
 @Composable
- fun Tag(
+ fun RoTag(
     text: String,
     type: TagType,
     modifier: Modifier = Modifier
@@ -33,6 +33,7 @@ enum class TagType { IMDB, QUALITY, SOLID, OUTLINE }
         TagType.OUTLINE -> Color.Transparent to Color.White // Nền trong, viền trắng
         TagType.IMDB -> Color.Transparent to imdbYellow     // Nền trong, viền vàng
         TagType.QUALITY -> Color(0xFF00C853) to null    // Nền xanh, không viền
+        TagType.GENRE -> MaterialTheme.colorScheme.primaryContainer to Color.Transparent // Nền trong, viền trắng
     }
 
     // 2. Xây dựng nội dung Text đa màu sắc (Rich Text)

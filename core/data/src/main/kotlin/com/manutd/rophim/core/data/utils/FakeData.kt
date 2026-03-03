@@ -1060,6 +1060,8 @@ object FakeDataProvider {
             "Squid Game",
             "https://picsum.photos/seed/r1/320/180",
             8.0f,
+            episode = "9 Tập",
+            quality = "4K",
             MovieType.SERIES,
             listOf(Genre("g11", "Thriller"))
         ),
@@ -1068,6 +1070,8 @@ object FakeDataProvider {
             "Crash Landing on You",
             "https://picsum.photos/seed/r2/320/180",
             8.7f,
+            episode = "16 Tập",
+            quality = "4K",
             MovieType.SERIES,
             listOf(Genre("g5", "Lãng Mạn"))
         ),
@@ -1076,6 +1080,8 @@ object FakeDataProvider {
             "My Mister",
             "https://picsum.photos/seed/r3/320/180",
             9.0f,
+            episode = "16 Tập",
+            quality = "HD",
             MovieType.SERIES,
             listOf(Genre("g4", "Chính Kịch"))
         ),
@@ -1084,6 +1090,8 @@ object FakeDataProvider {
             "Parasite",
             "https://picsum.photos/seed/r4/320/180",
             8.6f,
+            episode = "Film",
+            quality = "4K",
             MovieType.MOVIE,
             listOf(Genre("g12", "Kinh Dị"))
         ),
@@ -1092,6 +1100,48 @@ object FakeDataProvider {
             "Itaewon Class",
             "https://picsum.photos/seed/r5/320/180",
             8.1f,
+            episode = "16 Tập",
+            quality = "4K",
+            MovieType.SERIES,
+            listOf(Genre("g13", "Khởi Nghiệp"))
+        ),
+        MovieRecommendation(
+            "r6",
+            "Itaewon Class",
+            "https://picsum.photos/seed/r5/320/180",
+            8.1f,
+            episode = "16 Tập",
+            quality = "4K",
+            MovieType.SERIES,
+            listOf(Genre("g13", "Khởi Nghiệp"))
+        ),
+        MovieRecommendation(
+            "r7",
+            "Itaewon Class",
+            "https://picsum.photos/seed/r5/320/180",
+            8.1f,
+            episode = "16 Tập",
+            quality = "HD",
+            MovieType.SERIES,
+            listOf(Genre("g13", "Khởi Nghiệp"))
+        ),
+        MovieRecommendation(
+            "r8",
+            "Itaewon Class",
+            "https://picsum.photos/seed/r5/320/180",
+            8.1f,
+            episode = "16 Tập",
+            quality = "HD",
+            MovieType.SERIES,
+            listOf(Genre("g13", "Khởi Nghiệp"))
+        ),
+        MovieRecommendation(
+            "r9",
+            "Itaewon Class",
+            "https://picsum.photos/seed/r5/320/180",
+            8.1f,
+            episode = "16 Tập",
+            quality = "HD",
             MovieType.SERIES,
             listOf(Genre("g13", "Khởi Nghiệp"))
         ),

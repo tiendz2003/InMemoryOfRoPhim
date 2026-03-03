@@ -13,9 +13,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.manutd.ronaldo.impl.screen.item.HorizontalMovieItem
-import com.manutd.ronaldo.impl.utils.BadgeType
-import com.manutd.ronaldo.impl.utils.MovieBadge
+import com.manutd.ronaldo.designsystem.utils.getBadges
+import com.manutd.ronaldo.impl.screen.item.MovieItem
 import com.manutd.ronaldo.network.model.Channel
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.toImmutableList
@@ -47,26 +46,20 @@ fun HorizontalListSection(
                 items = channels,
                 key = { _, channel -> channel.id }
             ) { index, channel ->
-                val badges = remember(channel.id, channel.rating, channel.episode, channel.quality) {
-                    getBadgesForChannel(channel)
-                }
-                HorizontalMovieItem(
+                val badges =
+                    remember(channel.id, channel.rating, channel.episode, channel.quality) {
+                        getBadges(
+                            rating = channel.rating,
+                            episode = channel.episode,
+                            quality = channel.quality
+                        )
+                    }
+                MovieItem(
                     channel = channel,
                     onClick = { onChannelClick(channel) },
                     badges = badges.toImmutableList(),
                 )
             }
         }
-    }
-}
-private fun getBadgesForChannel(channel: Channel): List<MovieBadge> {
-    return buildList {
-        add(MovieBadge("PĐ-${channel.rating}", BadgeType.AGE_RATING))
-        channel.episode.let {
-            if (it.contains("tập")) {
-                add(MovieBadge("LT-28", BadgeType.TIME_LIMIT))
-            }
-        }
-        add(MovieBadge(channel.quality, BadgeType.QUALITY))
     }
 }

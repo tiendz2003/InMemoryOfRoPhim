@@ -10,6 +10,7 @@ import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
+import com.airbnb.mvrx.args
 import com.airbnb.mvrx.hilt.AssistedViewModelFactory
 import com.airbnb.mvrx.hilt.MavericksViewModelComponent
 import com.airbnb.mvrx.hilt.ViewModelKey
@@ -36,7 +37,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class MoviesDetailViewModel @AssistedInject constructor(
     @Assisted state: DetailState,
     private val exoPlayerManager: ExoPlayerManager,
@@ -76,6 +76,17 @@ class MoviesDetailViewModel @AssistedInject constructor(
     init {
         player.addListener(playerListener)
         withState { loadMovieDetail(it.movieId) }
+        onEach(DetailState::movieDetailAsync) {async ->
+            if (async is Success) {
+                withState { state ->
+                    when (state.availableTabs.firstOrNull()) {
+                        is DetailTab.Cast -> loadCastIfNeeded(state)
+                        is DetailTab.Recommendations -> loadRecommendationsIfNeeded(state)
+                        else -> Unit
+                    }
+                }
+            }
+        }
     }
 
     private fun loadMovieDetail(movieId: String) {
@@ -98,16 +109,18 @@ class MoviesDetailViewModel @AssistedInject constructor(
     }
 
     private fun loadCastIfNeeded(state: DetailState) {
+        Log.d("loadCastIfNeeded", "${state.castAsync}")
         // Uninitialized = chưa load lần nào → load
         // Loading/Success/Fail → không load lại
-        if (state.castAsync !is com.airbnb.mvrx.Uninitialized) return
+        if (state.castAsync !is Uninitialized) return
         suspend {
             getCastUseCase(state.movieId)
         }.execute { copy(castAsync = it) }
     }
 
     private fun loadRecommendationsIfNeeded(state: DetailState) {
-        if (state.recommendAsync !is com.airbnb.mvrx.Uninitialized) return
+        Log.d("loadRecommendationsIfNeeded", "${state.recommendAsync}")
+        if (state.recommendAsync !is Uninitialized) return
         suspend {
             getRecommendationsUseCase(state.movieId)
         }.execute { copy(recommendAsync = it) }
@@ -219,9 +232,7 @@ data class DetailState(
     val showSynopsisSheet: Boolean = false,
     val isFavoriteLoading: Boolean = false
 ) : MavericksState {
-    constructor(args: MoviesDetailKey) : this(
-        movieId = args.movieId
-    )
+    constructor(id: String) : this(movieId = id)
 
     val movieDetail: MovieDetail? get() = movieDetailAsync()
     val availableTabs: List<DetailTab>
