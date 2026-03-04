@@ -20,22 +20,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.graphics.vector.rememberVectorPainter
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 @Composable
 fun RoButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     text: String,
-    icon: ImageVector? = null,
-    gradient: Brush? = null, // Truyền Gradient vào đây
-    containerColor: Color = MaterialTheme.colorScheme.primary, // Màu mặc định nếu không có gradient
+    icon: Painter? = null, // <-- Nhận Painter
+    gradient: Brush? = null,
+    containerColor: Color = MaterialTheme.colorScheme.primary,
     contentColor: Color = Color.Black,
     shape: Shape = RoundedCornerShape(8.dp)
 ) {
     val buttonColors = ButtonDefaults.buttonColors(
-        // MẸO: Nếu có gradient, ta set nền button trong suốt để lớp gradient bên dưới hiện lên
         containerColor = if (gradient != null) Color.Transparent else containerColor,
         contentColor = contentColor
     )
@@ -44,8 +46,6 @@ fun RoButton(
         onClick = onClick,
         modifier = modifier
             .height(42.dp)
-            // Nếu có gradient -> vẽ background gradient và cắt theo shape
-            // Nếu không -> để nguyên (Button tự tô màu theo containerColor)
             .then(
                 gradient?.let {
                     Modifier.background(brush = gradient, shape = shape)
@@ -58,19 +58,42 @@ fun RoButton(
             ),
         colors = buttonColors,
         shape = shape,
-        contentPadding = PaddingValues(horizontal = 16.dp) // Reset padding để tránh bị đè
+        contentPadding = PaddingValues(horizontal = 16.dp)
     ) {
-        // --- CONTENT (Icon + Text) ---
         if (icon != null) {
             Icon(
-                imageVector = icon,
+                painter = icon,
                 contentDescription = null,
             )
             Spacer(modifier = Modifier.width(8.dp))
         }
         Text(
             text = text,
-            style = MaterialTheme.typography.labelLarge
+            style = MaterialTheme.typography.titleMedium,
         )
     }
+}
+
+@Composable
+fun RoButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    text: String,
+    icon: ImageVector? = null, // <-- Nhận ImageVector
+    gradient: Brush? = null,
+    containerColor: Color = MaterialTheme.colorScheme.primary,
+    contentColor: Color = Color.Black,
+    shape: Shape = RoundedCornerShape(8.dp)
+) {
+    // Chuyển đổi ImageVector thành Painter và gọi phiên bản gốc của RoButton
+    RoButton(
+        onClick = onClick,
+        modifier = modifier,
+        text = text,
+        icon = icon?.let { rememberVectorPainter(image = it) },
+        gradient = gradient,
+        containerColor = containerColor,
+        contentColor = contentColor,
+        shape = shape
+    )
 }

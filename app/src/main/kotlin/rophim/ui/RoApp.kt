@@ -2,9 +2,13 @@ package rophim.ui
 
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
@@ -59,6 +63,7 @@ import com.manutd.ronaldo.navigation.Navigator
 import com.manutd.ronaldo.navigation.toEntries
 import com.ronaldo.rophim.navigation.moviesDetailEntry
 import rophim.navigation.TOP_LEVEL_NAV_ITEMS
+import java.lang.System.exit
 
 
 @Composable
@@ -82,12 +87,14 @@ fun RoApp(
                 )
             }
         }
-        CompositionLocalProvider(LocalSnackbarHostState provides snackbarHostState) {
-            RoPhimApp(
-                appState = appState,
-                modifier = modifier,
-                windowAdaptiveInfo = windowAdaptiveInfo,
-            )
+        SharedTransitionLayout {
+            CompositionLocalProvider(LocalSnackbarHostState provides snackbarHostState) {
+                RoPhimApp(
+                    appState = appState,
+                    modifier = modifier,
+                    windowAdaptiveInfo = windowAdaptiveInfo,
+                )
+            }
         }
     }
 }
@@ -176,22 +183,27 @@ internal fun RoPhimApp(
 private fun RoBottomBar(
     appState: RoAppState,
     navigator: Navigator,
-    shouldShowBottomBar: Boolean
+    shouldShowBottomBar: Boolean,
+    modifier: Modifier = Modifier
 ) {
     AnimatedVisibility(
         visible = shouldShowBottomBar,
         // Trượt từ dưới lên mượt mà (YouTube style)
-        enter = slideInVertically(
-            animationSpec = tween(durationMillis = 500, easing = LinearOutSlowInEasing),
-            initialOffsetY = { fullHeight -> fullHeight }
-        ),
+        enter =fadeIn(nonSpatialExpressiveSpring()) + slideInVertically(
+            spatialExpressiveSpring(),
+        ) {
+            it
+        },
         // Trượt tuột xuống dưới giấu đi
-        exit = slideOutVertically(
-            animationSpec = tween(durationMillis = 500, easing = FastOutLinearInEasing),
-            targetOffsetY = { fullHeight -> fullHeight }
-        )
+        exit = fadeOut(nonSpatialExpressiveSpring()) + slideOutVertically(
+            spatialExpressiveSpring(),
+        ) {
+            it
+        }
     ) {
-        RoNavigationBar {
+        RoNavigationBar(
+            modifier = modifier
+        ) {
             TOP_LEVEL_NAV_ITEMS.forEach { (navKey, navItem) ->
                 val selected = navKey == appState.navigationState.currentTopLevelKey
                 RoNavigationBarItem(
@@ -216,3 +228,12 @@ private fun RoBottomBar(
     }
 }
 
+fun <T> spatialExpressiveSpring() = spring<T>(
+    dampingRatio = 0.8f,
+    stiffness = 380f,
+)
+
+fun <T> nonSpatialExpressiveSpring() = spring<T>(
+    dampingRatio = 1f,
+    stiffness = 1600f,
+)

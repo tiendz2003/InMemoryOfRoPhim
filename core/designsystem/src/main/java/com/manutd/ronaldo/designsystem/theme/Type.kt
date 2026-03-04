@@ -104,11 +104,11 @@ internal val RoTypography = Typography(
         textAlign = TextAlign.Left,
     ),
     titleMedium = TextStyle(
-        fontWeight = FontWeight.Bold,
+        fontWeight = FontWeight.Medium,
         fontFamily = FontFamily(
-            Font(R.font.bold),
+            Font(R.font.medium),
         ),
-        fontSize = 18.sp,
+        fontSize = 16.sp,
         lineHeight = 24.sp,
         letterSpacing = 0.1.sp,
         textDirection = TextDirection.Ltr,

@@ -934,6 +934,7 @@ object FakeDataProvider {
         currentSeason = 1,
         totalSeasons = 1,
         latestEpisode = 14,
+        userRating = 7.0f,
         airingStatus = AiringStatus.OnAir(currentEpisode = 14, totalEpisode = 16),
         genres = listOf(
             Genre("g1", "Hài Hước"),
@@ -965,6 +966,7 @@ object FakeDataProvider {
         currentSeason = 1,
         totalSeasons = 1,
         latestEpisode = 12,
+        userRating = 9.0f,
         airingStatus = AiringStatus.Completed,
         genres = listOf(
             Genre("g3", "Hài"),
@@ -1005,6 +1007,7 @@ object FakeDataProvider {
             Genre("g9", "Phiêu Lưu"),
             Genre("g10", "Hoạt Hình")
         ),
+        userRating = 10.0f,
         synopsis = "Tiếp nối hành trình của Tanjiro và đồng đội, trận chiến sinh tử với Thượng Huyền Nhất Kokushibo cuối cùng cũng đến hồi kết. Số phận của toàn bộ Đội Diệt Quỷ và nhân loại sẽ được quyết định trong một đêm duy nhất."
         // seasons = emptyList() — không có tập phim
     )

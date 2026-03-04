@@ -25,8 +25,8 @@ fun RoThumbnailImage(
             .build(),
         contentScale = scale,
         contentDescription = contentDescription,
-        placeholder = painterResource(id = R.drawable.ic_images),
-        error = painterResource(id = R.drawable.ic_image_error),
+        placeholder = painterResource(id = R.drawable.ic_placeholder),
+        error = painterResource(id = R.drawable.ic_placeholder),
         modifier = modifier
 
     )
