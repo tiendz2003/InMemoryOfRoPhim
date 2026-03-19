@@ -254,7 +254,7 @@ fun PlayerGestureHandler(
         )
         PlayerVerticalSlider(
             modifier = Modifier
-                .align(Alignment.CenterStart)
+                .align(Alignment.CenterEnd)
                 .background(
                     Brush.horizontalGradient(
                         0f to Color.Black.copy(0.6f),
