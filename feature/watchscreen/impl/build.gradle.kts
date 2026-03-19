@@ -13,7 +13,7 @@ dependencies {
 
     // 4. Coroutines Test (Để dùng runTest)
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.10.2")
-
+    implementation(projects.core.player)
     implementation(projects.core.domain)
     implementation(projects.feature.watchscreen.api)
     implementation(libs.androidx.core.ktx)

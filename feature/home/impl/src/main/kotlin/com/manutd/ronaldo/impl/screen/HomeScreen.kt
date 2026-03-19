@@ -1,7 +1,9 @@
 package com.manutd.ronaldo.impl.screen
 
 import android.util.Log
+import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
@@ -65,6 +67,8 @@ fun HomeScreenPreview() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
+    sharedTransitionScope: SharedTransitionScope,
+    animatedContentScope: AnimatedContentScope,
     onChannelClick: (String) -> Unit,
     onNotificationClick: () -> Unit,
     onLogoClick: () -> Unit,

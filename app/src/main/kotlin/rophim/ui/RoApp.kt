@@ -2,6 +2,7 @@ package rophim.ui
 
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
@@ -9,8 +10,10 @@ import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.WindowInsets
@@ -112,7 +115,6 @@ val LocalSnackbarHostState = compositionLocalOf<SnackbarHostState> {
 internal fun RoPhimApp(
     appState: RoAppState,
     modifier: Modifier = Modifier,
-    // windowAdaptiveInfo tạm thời không dùng cho Scaffold thuần, nhưng có thể giữ lại cho tương lai
     windowAdaptiveInfo: WindowAdaptiveInfo = currentWindowAdaptiveInfo(),
 ) {
     val snackbarHostState = LocalSnackbarHostState.current
@@ -173,6 +175,20 @@ internal fun RoPhimApp(
                     entries = appState.navigationState.toEntries(entryProvider),
                     sceneStrategy = listDetailStrategy,
                     onBack = { navigator.goBack() },
+                    transitionSpec = {
+                        fadeIn(tween(300)) + scaleIn(
+                            initialScale = 0.95f,
+                            animationSpec = tween(300)
+                        ) togetherWith ExitTransition.None
+                    },
+
+                    popTransitionSpec = {
+                        fadeIn(tween(200)) togetherWith fadeOut(tween(200))
+                    },
+
+                    predictivePopTransitionSpec = {
+                        fadeIn(tween(200)) togetherWith fadeOut(tween(200))
+                    },
                 )
             }
         }
@@ -189,7 +205,7 @@ private fun RoBottomBar(
     AnimatedVisibility(
         visible = shouldShowBottomBar,
         // Trượt từ dưới lên mượt mà (YouTube style)
-        enter =fadeIn(nonSpatialExpressiveSpring()) + slideInVertically(
+        enter = fadeIn(nonSpatialExpressiveSpring()) + slideInVertically(
             spatialExpressiveSpring(),
         ) {
             it
