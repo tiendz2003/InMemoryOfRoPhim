@@ -1,6 +1,6 @@
 package com.manutd.rophim.di
 
-import com.manutd.rophim.ExoPlayerManager
+import com.manutd.rophim.ExoPlayerFactory
 import android.content.Context
 import androidx.annotation.OptIn
 import androidx.media3.common.util.UnstableApi
@@ -51,5 +51,5 @@ object PlayerModule {
         @ApplicationContext context: Context,
         cache: SimpleCache,
         httpFactory: OkHttpDataSource.Factory
-    ): ExoPlayerManager = ExoPlayerManager(context, cache, httpFactory)
+    ): ExoPlayerFactory = ExoPlayerFactory(context, cache, httpFactory)
 }

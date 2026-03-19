@@ -21,7 +21,7 @@ import javax.inject.Singleton
 /*Đây là lớp quản lý player ,mọi logic khởi tạo,cache... sẽ được quản lý ở đây*/
 @Singleton
 @OptIn(UnstableApi::class)
-class ExoPlayerManager
+class ExoPlayerFactory
 @Inject constructor(
     @ApplicationContext private val context: Context,
     private val playerCache: SimpleCache,

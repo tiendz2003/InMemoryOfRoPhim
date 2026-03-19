@@ -10,10 +10,7 @@ import com.airbnb.mvrx.MavericksViewModel
 import com.airbnb.mvrx.MavericksViewModelFactory
 import com.airbnb.mvrx.Success
 import com.airbnb.mvrx.Uninitialized
-import com.airbnb.mvrx.args
 import com.airbnb.mvrx.hilt.AssistedViewModelFactory
-import com.airbnb.mvrx.hilt.MavericksViewModelComponent
-import com.airbnb.mvrx.hilt.ViewModelKey
 import com.airbnb.mvrx.hilt.hiltMavericksViewModelFactory
 import com.manutd.ronaldo.domain.GetCastUseCase
 import com.manutd.ronaldo.domain.GetMovieDetailUseCase
@@ -24,28 +21,22 @@ import com.manutd.ronaldo.network.model.MovieDetail
 import com.manutd.ronaldo.network.model.MovieRecommendation
 import com.manutd.ronaldo.network.model.MovieType
 import com.manutd.ronaldo.network.model.RatingSource
-import com.manutd.rophim.ExoPlayerManager
-import com.ronaldo.rophim.api.MoviesDetailKey
-import dagger.Binds
-import dagger.Module
+import com.manutd.rophim.ExoPlayerFactory
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import dagger.hilt.InstallIn
-import dagger.multibindings.IntoMap
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 
 class MoviesDetailViewModel @AssistedInject constructor(
     @Assisted state: DetailState,
-    private val exoPlayerManager: ExoPlayerManager,
+    private val exoPlayerFactory: ExoPlayerFactory,
     private val getMovieDetailUseCase: GetMovieDetailUseCase,
     private val getCastUseCase: GetCastUseCase,
     private val getRecommendationsUseCase: GetRecommendationsUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase
 ) : MavericksViewModel<DetailState>(state) {
-    val player: ExoPlayer get() = exoPlayerManager.player
+    val player: ExoPlayer get() = exoPlayerFactory.player
 
     private val playerListener = object : Player.Listener {
         override fun onPlaybackStateChanged(playbackState: Int) {
@@ -76,14 +67,12 @@ class MoviesDetailViewModel @AssistedInject constructor(
     init {
         player.addListener(playerListener)
         withState { loadMovieDetail(it.movieId) }
-        onEach(DetailState::movieDetailAsync) {async ->
-            if (async is Success) {
-                withState { state ->
-                    when (state.availableTabs.firstOrNull()) {
-                        is DetailTab.Cast -> loadCastIfNeeded(state)
-                        is DetailTab.Recommendations -> loadRecommendationsIfNeeded(state)
-                        else -> Unit
-                    }
+        onAsync(DetailState::movieDetailAsync) {
+            withState { state ->
+                when (state.availableTabs.firstOrNull()) {
+                    is DetailTab.Cast -> loadCastIfNeeded(state)
+                    is DetailTab.Recommendations -> loadRecommendationsIfNeeded(state)
+                    else -> Unit
                 }
             }
         }
@@ -131,7 +120,7 @@ class MoviesDetailViewModel @AssistedInject constructor(
             if (url == s.currentTrailerUrl && s.trailerUiState !is TrailerUiState.Error) return@withState
             setState { copy(currentTrailerUrl = url, trailerUiState = TrailerUiState.Buffering) }
             viewModelScope.launch(Dispatchers.Main) {
-                exoPlayerManager.prepareMedia(url)
+                exoPlayerFactory.prepareMedia(url)
                 player.play()
             }
         }
@@ -196,8 +185,7 @@ class MoviesDetailViewModel @AssistedInject constructor(
     override fun onCleared() {
         super.onCleared()
         player.removeListener(playerListener)
-        player.pause()
-        player.clearMediaItems()
+        player.release()
     }
 
     @AssistedFactory
@@ -236,10 +224,10 @@ data class DetailState(
 
     val movieDetail: MovieDetail? get() = movieDetailAsync()
     val availableTabs: List<DetailTab>
-        get() = buildList {
-            if (movieDetail?.type == MovieType.SERIES) add(DetailTab.Episodes)
-            add(DetailTab.Cast)
-            add(DetailTab.Recommendations)
+        get() = if (movieDetail?.type == MovieType.SERIES) {
+            listOf(DetailTab.Episodes, DetailTab.Cast, DetailTab.Recommendations)
+        } else {
+            listOf(DetailTab.Cast, DetailTab.Recommendations)
         }
     val showEpisodesButton: Boolean
         get() = movieDetail?.type == MovieType.SERIES
@@ -253,16 +241,16 @@ data class DetailState(
     val metadataBadges: List<MetadataBadge>
         get() {
             val detail = movieDetail ?: return emptyList()
-            return buildList {
-                // IMDb badge
-                detail.ratings.firstOrNull { it.source == RatingSource.IMDB }?.let {
-                    add(MetadataBadge.Rating("IMDb", it.score))
-                }
-                add(MetadataBadge.Text(detail.classification))
-                add(MetadataBadge.Text(detail.releaseYear.toString()))
-                detail.currentSeason?.let { add(MetadataBadge.Text("Phần $it")) }
-                detail.latestEpisode?.let { add(MetadataBadge.Text("Tập $it")) }
+            // Tránh dùng buildList mỗi lần gọi, có thể tái sử dụng list nếu cần
+            val badges = mutableListOf<MetadataBadge>()
+            detail.ratings.firstOrNull { it.source == RatingSource.IMDB }?.let {
+                badges.add(MetadataBadge.Rating("IMDb", it.score))
             }
+            badges.add(MetadataBadge.Text(detail.classification))
+            badges.add(MetadataBadge.Text(detail.releaseYear.toString()))
+            detail.currentSeason?.let { badges.add(MetadataBadge.Text("Phần $it")) }
+            detail.latestEpisode?.let { badges.add(MetadataBadge.Text("Tập $it")) }
+            return badges.toList()
         }
 }
 
