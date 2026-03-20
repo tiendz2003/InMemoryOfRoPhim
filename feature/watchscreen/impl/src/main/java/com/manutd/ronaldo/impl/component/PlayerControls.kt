@@ -103,7 +103,7 @@ internal fun PlayerControls(
                     && !gestureState.isDoubleTapping
                     && !gestureState.isSliding
                     && !gestureState.isSpeedBoosting
-                     //todo:tạo crub state
+            //todo:tạo crub state
         }
     }
     BackHandler(enabled = isLocked) {
@@ -120,7 +120,7 @@ internal fun PlayerControls(
                 || gestureState.isSliding
                 || gestureState.isSpeedBoosting
                 || !uiMode.isNone
-                  //todo:tạo crub state
+        //todo:tạo crub state
 
         if (controlsVisibilityState.isVisible && gestureActive) {
             // Gesture bắt đầu: ẩn controls, queue để restore sau
@@ -142,11 +142,11 @@ internal fun PlayerControls(
     }
     //scrubbing → controls luôn hiện
     //todo:tạo crub state
-  /*  LaunchedEffect(state.isDraggingSlider) {
-        if (state.isDraggingSlider) {
-            controlsVisibilityState.show(true)
-        }
-    }*/
+    /*  LaunchedEffect(state.isDraggingSlider) {
+          if (state.isDraggingSlider) {
+              controlsVisibilityState.show(true)
+          }
+      }*/
     // Effect: speed boost → 2x playback
     LaunchedEffect(gestureState.isSpeedBoosting) {
         val speed = if (gestureState.isSpeedBoosting) 2f else 1f
