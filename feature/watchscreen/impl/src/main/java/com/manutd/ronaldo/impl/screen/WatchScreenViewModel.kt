@@ -1,10 +1,5 @@
 package com.manutd.ronaldo.impl.screen
 
-import android.media.AudioTrack
-import androidx.media3.common.PlaybackException
-import androidx.media3.common.Player
-import androidx.media3.common.Timeline
-import androidx.media3.exoplayer.ExoPlayer
 import com.airbnb.mvrx.Async
 import com.airbnb.mvrx.MavericksState
 import com.airbnb.mvrx.MavericksViewModel
@@ -20,228 +15,121 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 
 class WatchScreenViewModel @AssistedInject constructor(
     @Assisted state: WatchState,
-    private val roPlayer: RoPlayer
+    private val roPlayer: RoPlayer,
+    // TODO: inject các UseCase khi có repository thật
+    // private val getEpisodesUseCase: GetEpisodesUseCase,
+    // private val updateWatchProgressUseCase: UpdateWatchProgressUseCase,
+    // private val getServersUseCase: GetServersUseCase,
 ) : MavericksViewModel<WatchState>(state) {
-    val player: ExoPlayer get() = roPlayer.player
-    private var progressJob: Job? = null
-    private var hideControlsJob: Job? = null
-    private var seekFeedbackJob: Job? = null
 
-    private val playerListener = object : Player.Listener {
+    val player: RoPlayer get() = roPlayer
+    private var syncProgressJob: Job? = null
 
-        override fun onPlaybackStateChanged(state: Int) {
-            val playerState = when (state) {
-                Player.STATE_BUFFERING -> WatchPlayerState.Buffering
-                Player.STATE_READY -> WatchPlayerState.Ready
-                Player.STATE_ENDED -> WatchPlayerState.Ended
-                else -> WatchPlayerState.Idle
-            }
-            setState { copy(playerState = playerState) }
-
-            // Chỉ polling progress khi READY
-            if (state == Player.STATE_READY) startProgressPolling()
-            else stopProgressPolling()
-        }
-
-        override fun onIsPlayingChanged(isPlaying: Boolean) {
-            setState { copy(isPlaying = isPlaying) }
-            if (isPlaying) startProgressPolling() else stopProgressPolling()
-        }
-
-        override fun onTimelineChanged(timeline: Timeline, reason: Int) {
-            // Duration có thể chỉ có sau khi timeline ready
-            setState { copy(durationMs = player.duration.coerceAtLeast(0L)) }
-        }
-
-        override fun onPlayerError(error: PlaybackException) {
-            stopProgressPolling()
-            val message = when (error.errorCode) {
-                PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED,
-                PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_TIMEOUT ->
-                    "Mất kết nối mạng. Vui lòng thử lại."
-
-                PlaybackException.ERROR_CODE_IO_FILE_NOT_FOUND ->
-                    "Không tìm thấy video."
-
-                PlaybackException.ERROR_CODE_DECODER_INIT_FAILED ->
-                    "Thiết bị không hỗ trợ định dạng này."
-
-                else -> "Lỗi phát video. Thử lại sau."
-            }
-            setState { copy(playerState = WatchPlayerState.Error(message)) }
-        }
-    }
 
     init {
-        player.addListener(playerListener)
         withState { loadMedia(it) }
     }
 
-    private fun loadMedia(state: WatchState) {
-        // Lấy URL từ episodeId hoặc fallback fake data
-        val videoUrl = state.episode?.id.let { id ->
+    private fun resolveVideoUrl(state: WatchState): String {
+        return state.episode?.id?.let { episodeId ->
             FakeDataProvider.seriesOnAir.seasons
                 .flatMap { it.episodes }
-                .firstOrNull { it.id == id }
+                .firstOrNull { it.id == episodeId }
                 ?.videoUrl
-        } ?: FakeDataProvider.seriesOnAir.seasons.firstOrNull()?.episodes?.firstOrNull()?.videoUrl
-        ?: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+        }
+            ?: FakeDataProvider.seriesOnAir.seasons
+                .firstOrNull()?.episodes?.firstOrNull()?.videoUrl
+            ?: FALLBACK_URL
+    }
 
+    private fun loadMedia(state: WatchState) {
+       viewModelScope.launch {
+           val videoUrl = resolveVideoUrl(state)
+           roPlayer.prepareMedia(videoUrl)
+           roPlayer.playWhenReady = true
+       }
+    }
+
+    fun onEpisodeSelected(episode: Episode) {
+        setState { copy(episode = episode, lastSyncedPositionMs = 0L) }
+        // Sync progress tập cũ trước khi switch
+        withState { syncWatchProgress(it.lastSyncedPositionMs, force = true) }
+        // Load media mới
+        val videoUrl = FakeDataProvider.seriesOnAir.seasons
+            .flatMap { it.episodes }
+            .firstOrNull { it.id == episode.id }
+            ?.videoUrl ?: FALLBACK_URL
         roPlayer.prepareMedia(videoUrl)
-        player.playWhenReady = true
+        roPlayer.playWhenReady = true
     }
 
-    // ── Progress polling ──────────────────────────────────────────
-    // Poll mỗi 500ms thay vì mỗi frame — đủ mượt cho Seekbar, không tốn CPU
-    private fun startProgressPolling() {
-        if (progressJob?.isActive == true) return
-        progressJob = viewModelScope.launch {
-            while (coroutineContext.isActive) {
-                withState { s ->
-                    // Không update nếu user đang drag — tránh state conflict
-                    if (!s.isDraggingSlider) {
-                        setState {
-                            copy(
-                                currentPositionMs = player.currentPosition.coerceAtLeast(0L),
-                                bufferedPositionMs = player.bufferedPosition.coerceAtLeast(0L),
-                                durationMs = player.duration.coerceAtLeast(0L)
-                            )
-                        }
-                    }
-                }
-                delay(500L)
-            }
+
+    fun syncWatchProgress(positionMs: Long, force: Boolean = false) {
+        if (force) {
+            syncProgressJob?.cancel()
+            doSyncProgress(positionMs)
+            return
+        }
+        // Throttle: chỉ schedule nếu chưa có job đang chờ
+        if (syncProgressJob?.isActive == true) return
+        syncProgressJob = viewModelScope.launch {
+            delay(SYNC_INTERVAL_MS)
+            doSyncProgress(positionMs)
         }
     }
 
-    fun onScreenTap() {
-        withState { s ->
-            if (s.showControls) {
-                // Đang hiện → ẩn ngay
-                setState { copy(showControls = false) }
-                hideControlsJob?.cancel()
-            } else {
-                // Đang ẩn → hiện và schedule auto-hide
-                setState { copy(showControls = true) }
-                scheduleHideControls()
-            }
-        }
-    }
-
-    fun onControlsInteraction() {
-        withState { if (it.showControls) scheduleHideControls() }
-    }
-
-    private fun scheduleHideControls() {
-        hideControlsJob?.cancel()
-        hideControlsJob = viewModelScope.launch {
-            delay(3_000L)
-            setState { copy(showControls = false) }
-        }
-    }
-
-    fun togglePlayPause() {
-        if (player.isPlaying) player.pause() else player.play()
-        onControlsInteraction()
-    }
-
-    fun seekTo(positionMs: Long) {
-        player.seekTo(positionMs.coerceIn(0L, player.duration.coerceAtLeast(0L)))
-        onControlsInteraction()
-    }
-
-    fun seekForward() {
-        seekTo(player.currentPosition + 10_000L)
-        showSeekFeedback(isForward = true)
-        onControlsInteraction()
-    }
-
-    fun seekBackward() {
-        seekTo(player.currentPosition - 10_000L)
-        showSeekFeedback(isForward = false)
-        onControlsInteraction()
-    }
-
-    private fun showSeekFeedback(isForward: Boolean) {
-        setState { copy(seekFeedback = SeekFeedback(isForward)) }
-        seekFeedbackJob?.cancel()
-        seekFeedbackJob = viewModelScope.launch {
-            delay(800L)
-            setState { copy(seekFeedback = null) }
-        }
-    }
-
-    // Tách onDragStart / onDrag / onDragEnd để kiểm soát chính xác
-    fun onSliderDragStart(positionMs: Long) {
-        setState { copy(isDraggingSlider = true, dragPositionMs = positionMs) }
-        stopProgressPolling()   // Dừng update từ player
-        onControlsInteraction()
-    }
-
-    fun onSliderDrag(positionMs: Long) {
-        // Chỉ update dragPositionMs — Slider đọc state.dragPositionMs qua lambda
-        // → chỉ Slider recompose, không phải toàn màn hình
-        setState { copy(dragPositionMs = positionMs) }
-    }
-
-    fun onSliderDragEnd(positionMs: Long) {
-        seekTo(positionMs)
-        setState { copy(isDraggingSlider = false) }
-        startProgressPolling()  // Resume polling
-    }
-    // ViewModel chỉ lưu level hiển thị UI
-    // Logic thực tế (AudioManager, WindowAttributes) xử lý ở GestureOverlay
-    // vì cần Context và Window — không nên đưa vào ViewModel
-
-    fun onVolumeChanged(level: Float) {
-        setState { copy(volumeLevel = level, showVolumeFeedback = true) }
+    private fun doSyncProgress(positionMs: Long) {
+        setState { copy(lastSyncedPositionMs = positionMs) }
         viewModelScope.launch {
-            delay(1_500L)
-            setState { copy(showVolumeFeedback = false) }
+            // TODO: gọi updateWatchProgressUseCase(movieId, episodeId, positionMs)
+            // runCatching { updateWatchProgressUseCase(...) }
+            //     .onFailure { /* log lỗi, không show UI error vì không critical */ }
         }
     }
 
-    fun onBrightnessChanged(level: Float) {
-        setState { copy(brightnessLevel = level, showBrightnessFeedback = true) }
-        viewModelScope.launch {
-            delay(1_500L)
-            setState { copy(showBrightnessFeedback = false) }
+    fun loadEpisodesIfNeeded() {
+        withState { state ->
+            // Uninitialized = chưa load lần nào → load
+            // Loading/Success/Fail → không load lại
+            if (state.episodesAsync !is Uninitialized) return@withState
+            suspend {
+                // TODO: getEpisodesUseCase(state.movieId)
+                // Fake data tạm thời
+                FakeDataProvider.seriesOnAir.seasons.flatMap { it.episodes }
+            }.execute { copy(episodesAsync = it) }
         }
     }
 
-    fun toggleTrackSheet() = setState { copy(showTrackSheet = !showTrackSheet) }
+    fun clearNetworkError() = setState { copy(networkError = null) }
+
+    fun retryMedia() {
+        withState { loadMedia(it) }
+    }
+
 
     fun onLifecycleStop() {
-        player.pause()
-        stopProgressPolling()
+        roPlayer.pause()
+        // Sync progress khi app vào background
+        syncProgressJob?.cancel()
+        withState { syncWatchProgress(it.lastSyncedPositionMs, force = true) }
     }
 
-    fun onLifecycleStart() {
-        withState { s ->
-            if (s.playerState is WatchPlayerState.Ready) {
-                player.play()
-            }
-        }
-    }
 
     override fun onCleared() {
         super.onCleared()
-        stopProgressPolling()
-        hideControlsJob?.cancel()
-        seekFeedbackJob?.cancel()
-        player.removeListener(playerListener)
-        player.release()
+        syncProgressJob?.cancel()
+        // Sync lần cuối khi rời màn hình
+        withState { syncWatchProgress(it.lastSyncedPositionMs, force = true) }
+        // Không release RoPlayer vì là @Singleton
+        // Chỉ clear media để giải phóng bộ nhớ
+        roPlayer.clearMediaItems()
+        roPlayer.stop()
     }
 
-    private fun stopProgressPolling() {
-        progressJob?.cancel()
-        progressJob = null
-    }
 
     @AssistedFactory
     interface Factory : AssistedViewModelFactory<WatchScreenViewModel, WatchState> {
@@ -249,51 +137,34 @@ class WatchScreenViewModel @AssistedInject constructor(
     }
 
     companion object : MavericksViewModelFactory<WatchScreenViewModel, WatchState>
-    by hiltMavericksViewModelFactory()
+    by hiltMavericksViewModelFactory() {
+        private const val FALLBACK_URL =
+            "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+        private const val SYNC_INTERVAL_MS = 10_000L
+    }
 }
 
-sealed class WatchPlayerState {
-    object Idle : WatchPlayerState()
-    object Buffering : WatchPlayerState()
-    object Ready : WatchPlayerState()
-    object Ended : WatchPlayerState()
-    data class Error(val message: String) : WatchPlayerState()
-}
-
-data class TrackSelectionState(
-    val availableAudioTracks: List<AudioTrack> = emptyList(),
-    val selectedAudioTrackId: String? = null,
-    val availableSubtitleTracks: List<AudioTrack> = emptyList(),
-    val selectedSubtitleTrackId: String? = null
-)
 
 data class WatchState(
     val movieId: String = "",
     val episode: Episode? = null,
-    val playerState: WatchPlayerState = WatchPlayerState.Idle,
-    val isPlaying: Boolean = false,
-    // Slider đọc qua lambda để tránh recompose toàn màn hình
-    val currentPositionMs: Long = 0L,
-    val durationMs: Long = 0L,
-    val bufferedPositionMs: Long = 0L,
-    // Khi user đang drag: dừng update từ player, tránh conflict
-    val isDraggingSlider: Boolean = false,
-    val dragPositionMs: Long = 0L,
-    val showControls: Boolean = true,
-    // Hiện icon volume/brightness khi đang drag
-    val volumeLevel: Float = 0f,         // 0f - 1f
-    val brightnessLevel: Float = -1f,    // -1f = dùng system, 0f-1f = override
-    val showVolumeFeedback: Boolean = false,
-    val showBrightnessFeedback: Boolean = false,
-    val seekFeedback: SeekFeedback? = null,
-    // ── Track selection
-    val showTrackSheet: Boolean = false,
-    val trackSelectionState: TrackSelectionState = TrackSelectionState(),
 
-    // ── Episode data (nếu là phim bộ)
-    val episodeAsync: Async<Episode> = Uninitialized,
+    // ── Async data từ network
+    val episodesAsync: Async<List<Episode>> = Uninitialized,
 
-    ) : MavericksState {
+    // ── Watch progress — sync lên server theo interval
+    // Không phải currentPositionMs (đã về ScrubState)
+    val lastSyncedPositionMs: Long = 0L,
+
+    // ── Network error (tách biệt với player error)
+    // Player error được handle bởi Player.Listener trong State class
+    val networkError: String? = null,
+
+    //  Server/Source selection (placeholder cho sau)
+    // val serversAsync: Async<List<Server>> = Uninitialized,
+    // val selectedServerId: String? = null,
+
+) : MavericksState {
 
     constructor(
         movieId: String,
@@ -303,21 +174,4 @@ data class WatchState(
         episode = episodeArgs
     )
 
-
-    /** Position hiển thị: dùng dragPosition khi đang drag, player position khi không */
-    val displayPositionMs: Long
-        get() = if (isDraggingSlider) dragPositionMs else currentPositionMs
-
-    /** Progress 0f-1f cho Slider */
-    val progress: Float
-        get() = if (durationMs > 0L) displayPositionMs.toFloat() / durationMs else 0f
-
-    val isBuffering: Boolean get() = playerState is WatchPlayerState.Buffering
-    val hasError: Boolean get() = playerState is WatchPlayerState.Error
-    val errorMessage: String? get() = (playerState as? WatchPlayerState.Error)?.message
 }
-
-data class SeekFeedback(
-    val isForward: Boolean,
-    val seconds: Int = 10
-)

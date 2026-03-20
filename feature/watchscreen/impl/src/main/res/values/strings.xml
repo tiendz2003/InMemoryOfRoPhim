@@ -2,4 +2,13 @@
 <resources>
     <string name="unlock">Unlock</string>
     <string name="navigate_up">Navigate up</string>
+    <string name="next_episode">next episode</string>
+    <string name="servers">serves</string>
+    <string name="audio_and_subtitle">audio and subtitle</string>
+    <string name="speed">speed</string>
+    <string name="resize">resize</string>
+    <string name="episodes">episodes</string>
+    <string name="seek_backward">seek backward</string>
+    <string name="play_pause">play/pause</string>
+    <string name="seek_forward">seek forward</string>
 </resources>

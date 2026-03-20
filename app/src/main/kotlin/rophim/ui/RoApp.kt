@@ -62,6 +62,7 @@ import com.manutd.ronaldo.designsystem.component.RoNavigationBarItem
 import com.manutd.ronaldo.designsystem.component.RoNavigationSuiteScaffold
 import com.manutd.ronaldo.designsystem.theme.LightAndroidBackgroundTheme
 import com.manutd.ronaldo.impl.navigation.homeEntry
+import com.manutd.ronaldo.impl.navigation.watchScreenEntry
 import com.manutd.ronaldo.navigation.Navigator
 import com.manutd.ronaldo.navigation.toEntries
 import com.ronaldo.rophim.navigation.moviesDetailEntry
@@ -169,6 +170,7 @@ internal fun RoPhimApp(
                 val entryProvider = entryProvider {
                     homeEntry(navigator)
                     moviesDetailEntry(navigator)
+                    watchScreenEntry(navigator)
                 }
 
                 NavDisplay(

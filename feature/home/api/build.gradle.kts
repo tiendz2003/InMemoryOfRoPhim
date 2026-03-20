@@ -3,6 +3,6 @@ plugins {
 }
 
 android {
-    namespace = "com.manutd.ronaldo.api"
+    namespace = "com.manutd.ronaldo.feature.home.api"
 }
 

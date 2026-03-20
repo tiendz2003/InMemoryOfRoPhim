@@ -1,6 +1,5 @@
-package com.manutd.rophim.di
+package com.rophim.player.di
 
-import com.manutd.rophim.ExoPlayerFactory
 import android.content.Context
 import androidx.annotation.OptIn
 import androidx.media3.common.util.UnstableApi
@@ -8,6 +7,7 @@ import androidx.media3.database.StandaloneDatabaseProvider
 import androidx.media3.datasource.cache.LeastRecentlyUsedCacheEvictor
 import androidx.media3.datasource.cache.SimpleCache
 import androidx.media3.datasource.okhttp.OkHttpDataSource
+import com.rophim.player.utils.RoPlayer
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -51,5 +51,5 @@ object PlayerModule {
         @ApplicationContext context: Context,
         cache: SimpleCache,
         httpFactory: OkHttpDataSource.Factory
-    ): ExoPlayerFactory = ExoPlayerFactory(context, cache, httpFactory)
+    ): RoPlayer = RoPlayer(context, cache, httpFactory)
 }

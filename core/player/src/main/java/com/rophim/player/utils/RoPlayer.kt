@@ -8,6 +8,9 @@ import android.view.SurfaceView
 import android.view.TextureView
 import androidx.annotation.OptIn
 import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.setValue
 import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.DeviceInfo
@@ -47,6 +50,8 @@ class RoPlayer
 ) : CuesProvider, Player {
     private var _player: ExoPlayer? = null
     val player: ExoPlayer get() = _player ?: createPlayer().also { _player = it }
+    override var offset by mutableLongStateOf(0L)
+        private set
 
     private fun createPlayer(): ExoPlayer {
         return ExoPlayer.Builder(context)
@@ -111,7 +116,6 @@ class RoPlayer
     }
 
     override fun setPlayWhenReady(playWhenReady: Boolean) {
-        TODO("Not yet implemented")
     }
 
     override fun seekTo(position: Long) {
@@ -650,15 +654,13 @@ class RoPlayer
         _player?.unmute()
     }
 
-    override val offset: Long
-        get() = TODO("Not yet implemented")
 
     override fun addCue(cue: CueWithTiming) {
-        TODO("Not yet implemented")
+
     }
 
     override fun clearCues() {
-        TODO("Not yet implemented")
+
     }
 }
 

@@ -1,6 +1,7 @@
 package com.manutd.ronaldo.impl.component
 
 import androidx.activity.compose.BackHandler
+import androidx.annotation.OptIn
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ContentTransform
@@ -10,7 +11,9 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -30,42 +33,59 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.media3.common.util.UnstableApi
 import com.airbnb.mvrx.compose.collectAsStateWithLifecycle
 import com.manutd.ronaldo.designsystem.animation.VerticalSlideAnimation
+import com.manutd.ronaldo.designsystem.component.GlassSurface
 import com.manutd.ronaldo.designsystem.component.RoIcon
 import com.manutd.ronaldo.designsystem.icon.IconType
-import com.manutd.ronaldo.impl.R
 import com.manutd.ronaldo.impl.gesture.PlayerGestureHandler
 import com.manutd.ronaldo.impl.screen.WatchScreenViewModel
 import com.manutd.ronaldo.impl.utils.UiMode
-import com.manutd.rophim.noIndicationClickable
-import com.rophim.player.manager.BrightnessManager
-import com.rophim.player.state.ControlsVisibilityState
-import com.rophim.player.manager.VolumeManager
-import com.rophim.player.state.PlayerGestureState
-import com.rophim.player.state.SeekButtonState
+import com.manutd.ronaldo.designsystem.utils.noIndicationClickable
+import com.manutd.ronaldo.designsystem.utils.noOpClickable
+import com.manutd.ronaldo.feature.watchscreen.impl.R
+import com.rophim.player.manager.BrightnessManager.Companion.rememberBrightnessManager
+import com.rophim.player.manager.VolumeManager.Companion.rememberVolumeManager
+import com.rophim.player.state.ControlsVisibilityState.Companion.rememberControlsVisibilityState
+import com.rophim.player.state.PlayPauseButtonState.Companion.rememberPlayPauseButtonState
+import com.rophim.player.state.PlaybackSpeedState
+import com.rophim.player.state.PlaybackSpeedState.Companion.rememberPlaybackSpeedState
+import com.rophim.player.state.PlayerGestureState.Companion.rememberPlayerGestureState
+import com.rophim.player.state.SeekButtonState.Companion.rememberSeekButtonState
 import com.rophim.player.utils.RoPlayer
 
+@OptIn(UnstableApi::class)
 @Composable
 internal fun PlayerControls(
     player: RoPlayer,
     viewModel: WatchScreenViewModel,
     onBack: () -> Unit,
+    onNext: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val state by viewModel.collectAsStateWithLifecycle()
-    val volumeManager = VolumeManager.rememberVolumeManager(player = player)
-    val brightnessManager = BrightnessManager.rememberBrightnessManager()
-    val seekButtonState = SeekButtonState.rememberSeekButtonState(player = player)
+    val volumeManager = rememberVolumeManager(player = player)
+    val brightnessManager = rememberBrightnessManager()
+    val seekButtonState = rememberSeekButtonState(player = player)
     val gestureState =
-        PlayerGestureState.rememberPlayerGestureState(seekButtonState.seekForwardAmountMs)
-    val controlsVisibilityState = ControlsVisibilityState.rememberControlsVisibilityState(
+        rememberPlayerGestureState(seekButtonState.seekForwardAmountMs)
+    val playPauseState = rememberPlayPauseButtonState(player = player)
+
+    val controlsVisibilityState = rememberControlsVisibilityState(
         player = player,
-        isScrubbing = { state.isDraggingSlider }
+        isScrubbing = {
+            //todo:tạo crub state
+            false
+        }
     )
+    val playbackSpeedState = rememberPlaybackSpeedState(player = player)
+
     var isLocked by remember { mutableStateOf(false) }
-    var uiMode by remember { mutableStateOf(UiMode.None) }
+    var uiMode: UiMode by remember { mutableStateOf(UiMode.None) }
     var bottomControlsHeightPx by remember { mutableIntStateOf(0) }
 
     // queueControlVisibility: cờ để restore controls sau khi gesture kết thúc
@@ -83,7 +103,7 @@ internal fun PlayerControls(
                     && !gestureState.isDoubleTapping
                     && !gestureState.isSliding
                     && !gestureState.isSpeedBoosting
-                    && !state.isDraggingSlider
+                     //todo:tạo crub state
         }
     }
     BackHandler(enabled = isLocked) {
@@ -94,13 +114,13 @@ internal fun PlayerControls(
         gestureState.isSliding,
         gestureState.isSpeedBoosting,
         uiMode,
-        state.isDraggingSlider
+        //todo:tạo crub state
     ) {
         val gestureActive = gestureState.isDoubleTapping
                 || gestureState.isSliding
                 || gestureState.isSpeedBoosting
                 || !uiMode.isNone
-                || state.isDraggingSlider
+                  //todo:tạo crub state
 
         if (controlsVisibilityState.isVisible && gestureActive) {
             // Gesture bắt đầu: ẩn controls, queue để restore sau
@@ -121,11 +141,12 @@ internal fun PlayerControls(
         }
     }
     //scrubbing → controls luôn hiện
-    LaunchedEffect(state.isDraggingSlider) {
+    //todo:tạo crub state
+  /*  LaunchedEffect(state.isDraggingSlider) {
         if (state.isDraggingSlider) {
             controlsVisibilityState.show(true)
         }
-    }
+    }*/
     // Effect: speed boost → 2x playback
     LaunchedEffect(gestureState.isSpeedBoosting) {
         val speed = if (gestureState.isSpeedBoosting) 2f else 1f
@@ -173,8 +194,12 @@ internal fun PlayerControls(
                         brightnessManager = brightnessManager,
                         volumeManager = volumeManager,
                         areControlsVisible = controlsVisibilityState.isVisible,
-                        onSeekForward = viewModel::seekForward,
-                        onSeekBackward = viewModel::seekBackward,
+                        onSeekForward = {
+                            player.seekForward()
+                        },
+                        onSeekBackward = {
+                            player.seekBack()
+                        },
                         onSingleTap = {
                             if (!uiMode.isNone) uiMode = UiMode.None
                             else controlsVisibilityState.toggle()
@@ -211,20 +236,10 @@ internal fun PlayerControls(
                         modifier = Modifier.align(Alignment.Center)
                     ) {
                         CenterControls(
-                            isPlaying = state.isPlaying,
-                            isBuffering = state.isBuffering,
-                            onPlayPauseClick = {
-                                viewModel.togglePlayPause()
-                                controlsVisibilityState.show()
-                            },
-                            onSeekForward = {
-                                viewModel.seekForward()
-                                controlsVisibilityState.show()
-                            },
-                            onSeekBackward = {
-                                viewModel.seekBackward()
-                                controlsVisibilityState.show()
-                            }
+                            playPauseButtonState = playPauseState,
+                            seekButtonState = seekButtonState,
+                            modifier = Modifier
+
                         )
                     }
 
@@ -238,18 +253,15 @@ internal fun PlayerControls(
                             }
                     ) {
                         BottomControls(
-                            currentPositionMs = { state.displayPositionMs },
-                            durationMs = { state.durationMs },
-                            bufferedPositionMs = { state.bufferedPositionMs },
-                            progress = { state.progress },
-                            isPlaying = state.isPlaying,
-                            isDraggingSlider = state.isDraggingSlider,
+                            playbackSpeedState = playbackSpeedState,
                             uiMode = uiMode,
-                            onSliderDragStart = viewModel::onSliderDragStart,
-                            onSliderDrag = viewModel::onSliderDrag,
-                            onSliderDragEnd = viewModel::onSliderDragEnd,
-                            onToggleUiPanel = { uiMode = it },
-                            onInteraction = { controlsVisibilityState.show() }
+                            onToggleUiPanel = { mode ->
+                                uiMode = mode
+                            },
+                            onNext = onNext,
+                            onShowEpisodesPanel = {
+
+                            }
                         )
                     }
                     //todo:triển khai thêm các panel cho episode,serves,playback
@@ -307,16 +319,93 @@ fun LockControls(
 
 
 @Composable
-fun SpeedBoostIndicator() {
-
+internal fun SpeedBoostIndicator(
+    modifier: Modifier = Modifier,
+) {
+    GlassSurface(
+        shape = MaterialTheme.shapes.small,
+        accentColor = MaterialTheme.colorScheme.primary,
+        modifier = modifier,
+    ) {
+        Text(
+            text = "2x",
+            color = Color.White.copy(alpha = 0.9f),
+            fontSize = 13.sp,
+            fontWeight = FontWeight.SemiBold,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+        )
+    }
 }
 
+
+@OptIn(UnstableApi::class)
 @Composable
-fun CenterControls() {
+internal fun BottomControls(
+    playbackSpeedState: PlaybackSpeedState,
+    /*    scrubState: ScrubState,
+        seekPreviewState: SeekPreviewState,*/
+    uiMode: UiMode,
+    onToggleUiPanel: (UiMode) -> Unit,
+    modifier: Modifier = Modifier,
+    onNext: (() -> Unit)? = null,
+    onShowEpisodesPanel: (() -> Unit)? = null,
+) {
+    Column(
+        modifier = modifier.fillMaxWidth()
+    ) {
+        /*   Scrubber(
+               state = scrubState,
+               seekPreviewState = seekPreviewState,
+               modifier = Modifier.padding(horizontal = 6.dp)
+           )*/
 
-}
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            modifier = Modifier
+                .fillMaxWidth()
+                .noOpClickable()
+        ) {
+            onShowEpisodesPanel?.let { onClick ->
+                LabeledButton(
+                    icon = R.drawable.playlist_play,
+                    contentDescription = stringResource(R.string.episodes),
+                    onClick = onClick
+                )
+            }
 
-@Composable
-fun BottomControls() {
+            LabeledButton(
+                icon = R.drawable.resize_mode_icon,
+                contentDescription = stringResource(R.string.resize),
+                enabled = playbackSpeedState.isEnabled && uiMode != UiMode.Resize,
+                onClick = { onToggleUiPanel(UiMode.Resize) }
+            )
 
+            LabeledButton(
+                icon = R.drawable.gauge,
+                contentDescription = stringResource(R.string.speed),
+                enabled = playbackSpeedState.isEnabled && uiMode != UiMode.PlaybackSpeed,
+                onClick = { onToggleUiPanel(UiMode.PlaybackSpeed) }
+            )
+
+            LabeledButton(
+                icon = R.drawable.record_voice_over_black_24dp,
+                contentDescription = stringResource(R.string.audio_and_subtitle),
+                onClick = { onToggleUiPanel(UiMode.Subtitles) }
+            )
+
+            LabeledButton(
+                icon = R.drawable.round_cloud_queue_24,
+                contentDescription = stringResource(R.string.servers),
+                onClick = { onToggleUiPanel(UiMode.Servers) }
+            )
+
+            onNext?.let {
+                LabeledButton(
+                    icon = R.drawable.round_skip_next_24,
+                    contentDescription = stringResource(R.string.next_episode),
+                    onClick = it
+                )
+            }
+        }
+    }
 }

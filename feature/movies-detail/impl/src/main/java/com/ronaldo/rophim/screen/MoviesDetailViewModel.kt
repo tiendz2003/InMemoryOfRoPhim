@@ -21,7 +21,7 @@ import com.manutd.ronaldo.network.model.MovieDetail
 import com.manutd.ronaldo.network.model.MovieRecommendation
 import com.manutd.ronaldo.network.model.MovieType
 import com.manutd.ronaldo.network.model.RatingSource
-import com.manutd.rophim.ExoPlayerFactory
+import com.rophim.player.utils.RoPlayer
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -30,13 +30,13 @@ import kotlinx.coroutines.launch
 
 class MoviesDetailViewModel @AssistedInject constructor(
     @Assisted state: DetailState,
-    private val exoPlayerFactory: ExoPlayerFactory,
+    private val exoPlayer: RoPlayer,
     private val getMovieDetailUseCase: GetMovieDetailUseCase,
     private val getCastUseCase: GetCastUseCase,
     private val getRecommendationsUseCase: GetRecommendationsUseCase,
     private val toggleFavoriteUseCase: ToggleFavoriteUseCase
 ) : MavericksViewModel<DetailState>(state) {
-    val player: ExoPlayer get() = exoPlayerFactory.player
+    val player: ExoPlayer get() = exoPlayer.player
 
     private val playerListener = object : Player.Listener {
         override fun onPlaybackStateChanged(playbackState: Int) {
@@ -120,7 +120,7 @@ class MoviesDetailViewModel @AssistedInject constructor(
             if (url == s.currentTrailerUrl && s.trailerUiState !is TrailerUiState.Error) return@withState
             setState { copy(currentTrailerUrl = url, trailerUiState = TrailerUiState.Buffering) }
             viewModelScope.launch(Dispatchers.Main) {
-                exoPlayerFactory.prepareMedia(url)
+                exoPlayer.prepareMedia(url)
                 player.play()
             }
         }

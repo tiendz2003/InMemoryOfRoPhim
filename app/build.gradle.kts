@@ -44,6 +44,8 @@ dependencies {
     implementation(projects.feature.home.impl)
     implementation(projects.feature.moviesDetail.api)
     implementation(projects.feature.moviesDetail.impl)
+    implementation(projects.feature.watchscreen.api)
+    implementation(projects.feature.watchscreen.impl)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.kotlinx.coroutines.guava)
     ksp(libs.hilt.compiler)

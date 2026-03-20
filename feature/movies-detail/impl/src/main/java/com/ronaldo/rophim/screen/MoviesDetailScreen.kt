@@ -43,7 +43,6 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
 import androidx.media3.ui.AspectRatioFrameLayout
@@ -54,6 +53,8 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.compose.collectAsStateWithLifecycle
 import com.manutd.ronaldo.designsystem.component.ShimmerBox
 import com.manutd.ronaldo.designsystem.theme.RoTheme
+import com.manutd.ronaldo.network.model.Episode
+import com.manutd.rophim.core.data.utils.FakeDataProvider
 import com.manutd.rophim.mavericksViewModel
 
 val AppYellow = Color(0xFFF5C518)
@@ -65,20 +66,9 @@ val TextSecondary = Color(0xFFAAAAAA)
 val OrangeAiring = Color(0xFFFF8C00)
 
 
-@Preview(showBackground = true)
-@Composable
-fun MoviesDetailScreenPreview() {
-    RoTheme() {
-        MoviesDetailScreen(
-            onNavigateToWatch = {},
-            onNavigateBack = {},
-        )
-    }
-}
-
 @Composable
 fun MoviesDetailScreen(
-    onNavigateToWatch: (episodeId: String?) -> Unit,
+    onNavigateToWatch: (movieId: String?, episode: Episode?) -> Unit,
     onNavigateBack: () -> Unit,
     viewModel: MoviesDetailViewModel = mavericksViewModel()
 ) {
@@ -125,7 +115,13 @@ fun MoviesDetailScreen(
             item(key = "action_buttons") {
                 ActionButtonsSection(
                     state = state,
-                    onWatchClick = { onNavigateToWatch(null) },
+                    onWatchClick = {
+                        onNavigateToWatch(
+                            state.movieDetail?.id,
+                            FakeDataProvider.seriesOnAir.seasons
+                                .flatMap { it.episodes }.first()
+                        )
+                    },
                     onEpisodesClick = {
                         // Scroll đến tab tập phim
                         val episodesTabIndex = state.availableTabs
@@ -134,7 +130,7 @@ fun MoviesDetailScreen(
                     }
                 )
             }
-            // ── Item 2: Movie Info ──────────────────────────────
+            // Movie Info
             item(key = "movie_info") {
                 MovieInfoSection(
                     state = state,
@@ -142,7 +138,7 @@ fun MoviesDetailScreen(
                 )
             }
 
-            // ── Item 3: User Actions (Yêu thích, Thêm vào...) ──
+            // Item 3: User Actions (Yêu thích, Thêm vào...)
             item(key = "user_actions") {
                 UserActionsSection(
                     state = state,
@@ -150,14 +146,20 @@ fun MoviesDetailScreen(
                 )
             }
 
-            // ── Item 4: Tab Layout + Content ───────────────────
+            // Item 4: Tab Layout + Content
             item(key = "tabs") {
                 TabSection(
                     state = state,
                     onTabSelected = viewModel::onTabSelected,
                     onSeasonSelected = viewModel::onSeasonSelected,
                     onAudioTrackSelected = viewModel::onAudioTrackSelected,
-                    onEpisodeClick = { episodeId -> onNavigateToWatch(episodeId) }
+                    onEpisodeClick = { episodeId ->
+                        //todo:truyefn thêm episode vào callback
+                        onNavigateToWatch(
+                            episodeId, FakeDataProvider.seriesOnAir.seasons
+                                .flatMap { it.episodes }.first()
+                        )
+                    }
                 )
             }
         }

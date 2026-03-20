@@ -4,7 +4,7 @@ plugins {
 }
 
 android {
-    namespace = "com.manutd.ronaldo.impl"
+    namespace = "com.manutd.ronaldo.feature.watchscreen.impl"
 
 }
 

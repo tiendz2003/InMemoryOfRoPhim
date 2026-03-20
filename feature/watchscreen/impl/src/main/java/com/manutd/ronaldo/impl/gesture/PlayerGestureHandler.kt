@@ -36,16 +36,14 @@ import androidx.compose.ui.platform.LocalWindowInfo
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.manutd.ronaldo.impl.R
-import com.manutd.rophim.noIndicationClickable
+import com.manutd.ronaldo.designsystem.utils.noIndicationClickable
+import com.manutd.ronaldo.feature.watchscreen.impl.R
 import com.rophim.player.manager.BrightnessManager
 import com.rophim.player.manager.VolumeManager
 import com.rophim.player.state.PlayerGestureState
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlin.compareTo
-import kotlin.times
 
 private const val DRAG_MULTIPLIER = 2f
 private const val HIDE_DELAY_MS = 1_000L

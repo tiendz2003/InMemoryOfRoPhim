@@ -3,5 +3,5 @@ plugins {
 }
 
 android {
-    namespace = "com.ronaldo.rophim.api"
+    namespace = "com.manutd.ronaldo.feature.watchscreen.api"
 }

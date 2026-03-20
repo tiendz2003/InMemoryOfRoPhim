@@ -5,6 +5,8 @@ import androidx.navigation3.runtime.NavKey
 import com.manutd.ronaldo.navigation.Navigator
 import com.manutd.rophim.mavericksViewModel
 import com.ronaldo.rophim.api.MoviesDetailKey
+import com.ronaldo.rophim.api.navigateToDetail
+import com.ronaldo.rophim.api.navigateToWatch
 import com.ronaldo.rophim.screen.MoviesDetailScreen
 
 fun EntryProviderScope<NavKey>.moviesDetailEntry(navigator: Navigator) {
@@ -12,7 +14,9 @@ fun EntryProviderScope<NavKey>.moviesDetailEntry(navigator: Navigator) {
         //todo:Truyền Id để load detail theo id trước hết ta sẽ truyền fake dữ liệu
         MoviesDetailScreen(
             onNavigateBack = {},
-            onNavigateToWatch = {},
+            onNavigateToWatch = { movieId, episode ->
+                navigator.navigateToWatch(movieId!!, episode = episode)
+            },
             viewModel = mavericksViewModel(
                 argsFactory = { key.movieId }
             )

@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.sp
 import com.manutd.ronaldo.designsystem.component.RoIcon
 import com.manutd.ronaldo.designsystem.icon.IconType
 import com.manutd.ronaldo.designsystem.theme.RoTheme
-import com.manutd.ronaldo.impl.R
+import com.manutd.ronaldo.feature.watchscreen.impl.R
 
 @Composable
 internal fun DoubleTapSeekOverlay(
