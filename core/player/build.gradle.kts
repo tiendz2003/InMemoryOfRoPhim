@@ -10,7 +10,7 @@ android {
 
 dependencies {
     implementation(libs.androidx.compose.material3)
-    implementation(libs.media3.ffmpeg)
+  //  implementation(libs.media3.ffmpeg)
     api(libs.media3.common)
     api(libs.media3.common.ktx)
     api(libs.androidx.media3.datasource.okhttp)

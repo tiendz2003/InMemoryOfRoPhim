@@ -4,17 +4,23 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 
+private const val SEEK_ACCUMULATE_TIMEOUT = 1200L
+
 @Stable
-class PlayerGestureState {
+class PlayerGestureState(
+    val seekAmountMs: Long
+) {
     //ẩn /hiển thị thanh volume/brightness
     var isVolumeSliderVisible by mutableStateOf(false)
         private set
     var isBrightnessSliderVisible by mutableStateOf(false)
         private set
+
     //tua tap
     var isDoubleTapSeekingForward by mutableStateOf(false)
         private set
@@ -22,24 +28,49 @@ class PlayerGestureState {
         private set
     var seekSeconds by mutableIntStateOf(0)
         private set
-    val isDoubleTapping: Boolean
-        get() = isDoubleTapSeekingForward || isDoubleTapSeekingBackward
+    var isDoubleTapping by mutableStateOf(false)
+        private set
+
     //tua nhanh
     var isSpeedBoosting by mutableStateOf(false)
         private set
+    var isSliding by mutableStateOf(false)
+        private set
+    val isGestureActive: Boolean get() = isDoubleTapping || isSliding || isSpeedBoosting
+    private var lastTapTimeMs by mutableLongStateOf(0L)
+
     fun showVolumeSlider() {
         isVolumeSliderVisible = true
         isBrightnessSliderVisible = false
+        isSliding = true
     }
+
     fun showBrightnessSlider() {
         isBrightnessSliderVisible = true
         isVolumeSliderVisible = false
+        isSliding = true
     }
+
     fun hideSliders() {
         isVolumeSliderVisible = false
         isBrightnessSliderVisible = false
     }
+
     fun onDoubleTap(isForward: Boolean) {
+        val currentTime = System.currentTimeMillis()
+        val seekIncrement = (seekAmountMs / 1000).toInt()
+        val isSameSide =
+            (isForward && isDoubleTapSeekingForward) || (!isForward && isDoubleTapSeekingBackward)
+
+        if (currentTime - lastTapTimeMs < SEEK_ACCUMULATE_TIMEOUT && isSameSide) {
+            seekSeconds += seekIncrement
+        } else {
+            seekSeconds = seekIncrement
+        }
+
+        lastTapTimeMs = currentTime
+        isDoubleTapping = true
+
         if (isForward) {
             isDoubleTapSeekingForward = true
             isDoubleTapSeekingBackward = false
@@ -47,17 +78,28 @@ class PlayerGestureState {
             isDoubleTapSeekingBackward = true
             isDoubleTapSeekingForward = false
         }
-        seekSeconds += 10
     }
+
     fun hideSeekOverlay() {
         isDoubleTapSeekingForward = false
         isDoubleTapSeekingBackward = false
-        seekSeconds = 0
+        isDoubleTapping = false
     }
-    fun startSpeedBoost() { isSpeedBoosting = true }
-    fun stopSpeedBoost()  { isSpeedBoosting = false }
+
+    fun startSpeedBoost() {
+        isSpeedBoosting = true
+    }
+
+    fun stopSpeedBoost() {
+        isSpeedBoosting = false
+    }
+
     companion object {
         @Composable
-        fun rememberPlayerGestureState() = remember { PlayerGestureState() }
+        fun rememberPlayerGestureState(seekAmountMs: Long) = remember(seekAmountMs) {
+            PlayerGestureState(
+                seekAmountMs
+            )
+        }
     }
 }

@@ -17,7 +17,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
-import androidx.media3.exoplayer.ExoPlayer
+import com.rophim.player.utils.RoPlayer
 
 @Stable
 class VolumeManager(
@@ -79,7 +79,7 @@ class VolumeManager(
 
         @OptIn(UnstableApi::class)
         @Composable
-        fun rememberVolumeManager(player: ExoPlayer): VolumeManager {
+        fun rememberVolumeManager(player: RoPlayer): VolumeManager {
             val context = LocalContext.current
             val manager = remember { VolumeManager(context) }
             LaunchedEffect(player) {

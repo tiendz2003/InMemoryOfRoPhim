@@ -13,7 +13,7 @@ import com.airbnb.mvrx.Uninitialized
 import com.airbnb.mvrx.hilt.AssistedViewModelFactory
 import com.airbnb.mvrx.hilt.hiltMavericksViewModelFactory
 import com.manutd.ronaldo.network.model.Episode
-import com.manutd.rophim.ExoPlayerFactory
+import com.rophim.player.utils.RoPlayer
 import com.manutd.rophim.core.data.utils.FakeDataProvider
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
@@ -25,9 +25,9 @@ import kotlinx.coroutines.launch
 
 class WatchScreenViewModel @AssistedInject constructor(
     @Assisted state: WatchState,
-    private val exoPlayerFactory: ExoPlayerFactory
+    private val roPlayer: RoPlayer
 ) : MavericksViewModel<WatchState>(state) {
-    val player: ExoPlayer get() = exoPlayerFactory.player
+    val player: ExoPlayer get() = roPlayer.player
     private var progressJob: Job? = null
     private var hideControlsJob: Job? = null
     private var seekFeedbackJob: Job? = null
@@ -84,7 +84,7 @@ class WatchScreenViewModel @AssistedInject constructor(
 
     private fun loadMedia(state: WatchState) {
         // Lấy URL từ episodeId hoặc fallback fake data
-        val videoUrl = state.episodeId?.let { id ->
+        val videoUrl = state.episode?.id.let { id ->
             FakeDataProvider.seriesOnAir.seasons
                 .flatMap { it.episodes }
                 .firstOrNull { it.id == id }
@@ -92,7 +92,7 @@ class WatchScreenViewModel @AssistedInject constructor(
         } ?: FakeDataProvider.seriesOnAir.seasons.firstOrNull()?.episodes?.firstOrNull()?.videoUrl
         ?: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
 
-        exoPlayerFactory.prepareMedia(videoUrl)
+        roPlayer.prepareMedia(videoUrl)
         player.playWhenReady = true
     }
 
@@ -269,7 +269,7 @@ data class TrackSelectionState(
 
 data class WatchState(
     val movieId: String = "",
-    val episodeId: String? = null,
+    val episode: Episode? = null,
     val playerState: WatchPlayerState = WatchPlayerState.Idle,
     val isPlaying: Boolean = false,
     // Slider đọc qua lambda để tránh recompose toàn màn hình
@@ -295,9 +295,12 @@ data class WatchState(
 
     ) : MavericksState {
 
-    constructor(args: WatchArgs) : this(
-        movieId = args.movieId,
-        episodeId = args.episodeId
+    constructor(
+        movieId: String,
+        episodeArgs: Episode?
+    ) : this(
+        movieId = movieId,
+        episode = episodeArgs
     )
 
 

@@ -67,8 +67,6 @@ fun HomeScreenPreview() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    sharedTransitionScope: SharedTransitionScope,
-    animatedContentScope: AnimatedContentScope,
     onChannelClick: (String) -> Unit,
     onNotificationClick: () -> Unit,
     onLogoClick: () -> Unit,

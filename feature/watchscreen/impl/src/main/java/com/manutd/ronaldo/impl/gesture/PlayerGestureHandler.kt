@@ -37,6 +37,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.manutd.ronaldo.impl.R
+import com.manutd.rophim.noIndicationClickable
 import com.rophim.player.manager.BrightnessManager
 import com.rophim.player.manager.VolumeManager
 import com.rophim.player.state.PlayerGestureState
@@ -60,7 +61,6 @@ fun PlayerGestureHandler(
     onSeekForward: () -> Unit,
     onSeekBackward: () -> Unit,
     onSingleTap: () -> Unit,
-    onSpeedChange: (Float) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val scope = rememberCoroutineScope()
@@ -112,7 +112,6 @@ fun PlayerGestureHandler(
                     } == null// null == timeout = bấm lâu kích hoạt
                     if (trigger) {
                         gestureState.startSpeedBoost()
-                        onSpeedChange(LONG_PRESS_SPEED)
                         //Giuwx speed đến khi nhả ngón tay
                         while (true) {
                             val event = awaitPointerEvent(PointerEventPass.Initial)
@@ -120,9 +119,12 @@ fun PlayerGestureHandler(
                             if (event.changes.all { !it.pressed }) break
                         }
                         gestureState.stopSpeedBoost()
-                        onSpeedChange(1f)
+
                     }
                 }
+            }.noIndicationClickable { onSingleTap() }
+            .onSizeChanged { size ->
+                screenHeight = size.height
             }
     ) {
         var dragStartBrightness by remember { mutableFloatStateOf(0f) }
